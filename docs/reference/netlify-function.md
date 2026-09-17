@@ -1,20 +1,26 @@
-# Netlify Function `claude.js` — contrato de la API interna
+# Función proxy interna `/api/claude` — contrato
 
 Función serverless que usa el wizard del browser (Seteador y Evaluador vía
-[`useClaude.js`](../../src/hooks/useClaude.js)). Código fuente:
-[`netlify/functions/claude.js`](../../netlify/functions/claude.js). No
-requiere API key propia — solo la llama el propio frontend, igual que el
-primer día de este proyecto.
+[`useClaude.js`](../../src/hooks/useClaude.js)), llamando siempre a la ruta
+relativa `/api/claude`. No requiere API key propia — solo la llama el propio
+frontend.
 
-Es distinta de la [API pública](api.md) (`kpi-estimate.js` / `kpi-evaluate.js`):
+Existe **una implementación por plataforma de deploy**, con el mismo
+contrato exacto — el frontend no sabe ni le importa cuál responde:
+
+| Plataforma | Código fuente | Cómo resuelve la ruta |
+|---|---|---|
+| Vercel (principal) | [`api/claude.js`](../../api/claude.js) | Convención de Vercel: todo archivo en `/api/` se sirve en `/api/<nombre>` automáticamente |
+| Netlify (secundaria) | [`netlify/functions/claude.js`](../../netlify/functions/claude.js) | Redirect `/api/* → /.netlify/functions/:splat` en [`netlify.toml`](../../netlify.toml) |
+
+Es distinta de la [API pública](api.md) (`kpi-estimate` / `kpi-evaluate`):
 esas sí requieren `X-Api-Key`, están pensadas para herramientas externas, y
 devuelven JSON ya parseado y validado en vez del wrapper crudo de Anthropic
 que devuelve esta.
 
-- **Endpoint (local con `netlify dev`)**: `http://localhost:8888/.netlify/functions/claude`
-- **Endpoint (producción)**: `https://<tu-sitio>.netlify.app/.netlify/functions/claude`
+- **Endpoint**: `/api/claude` (relativo — funciona igual en Vercel y Netlify)
 - **Método**: `POST` únicamente. Cualquier otro método devuelve `405 Method Not Allowed`.
-- **Runtime**: Node 20 (usa `fetch` nativo, sin dependencia `node-fetch`).
+- **Runtime**: Node 20, `fetch` nativo (sin dependencia `node-fetch`).
 
 ## Request
 
@@ -33,22 +39,22 @@ excepto en estos casos de error propios de la function:
 
 | Status | Cuándo | Body |
 |---|---|---|
-| `405` | Método distinto de `POST` | texto plano `"Method Not Allowed"` |
-| `500` | Falta `ANTHROPIC_API_KEY` en el entorno | `{ "error": "ANTHROPIC_API_KEY no está configurada en Netlify." }` |
-| `400` | El body no es JSON válido | `{ "error": "Body inválido." }` |
+| `405` | Método distinto de `POST` | `{ "error": "Method Not Allowed" }` |
+| `500` | Falta `ANTHROPIC_API_KEY` en el entorno | `{ "error": "ANTHROPIC_API_KEY no está configurada..." }` |
 | `502` | Falla el `fetch` a Anthropic (red, DNS, etc.) | `{ "error": "...", "detail": "<mensaje de la excepción>" }` |
 | `200` (o el status que devuelva Anthropic) | Llamada exitosa | El JSON crudo de la Messages API — el texto generado está en `body.content[0].text` |
 
 ## Modelo usado
 
-Hardcodeado en la function: `claude-sonnet-4-20250514`. Para cambiar de
-modelo, es el único lugar del repo donde está el nombre — no hay variable de
-entorno para esto hoy.
+Hardcodeado por separado en cada implementación: `claude-sonnet-4-20250514`.
+Si se cambia de modelo, hay que actualizarlo en **ambos** archivos
+(`api/claude.js` y `netlify/functions/claude.js`) — es la única duplicación
+real entre las dos plataformas; el resto de la lógica de negocio vive en
+`src/lib/` y `src/prompts/`, compartida.
 
 ## Seguridad
 
 La `ANTHROPIC_API_KEY` se lee de `process.env.ANTHROPIC_API_KEY` — nunca del
 body de la request ni de ningún valor que venga del cliente. El frontend
-(`src/hooks/useClaude.js`) llama siempre a `/.netlify/functions/claude`, nunca
-directo a `api.anthropic.com` — ver [explanation: arquitectura](../explanation/architecture.md)
-para el porqué.
+llama siempre a `/api/claude`, nunca directo a `api.anthropic.com` — ver
+[explanation: arquitectura](../explanation/architecture.md) para el porqué.

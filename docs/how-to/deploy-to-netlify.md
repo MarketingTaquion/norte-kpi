@@ -1,10 +1,17 @@
 # Deployar a Netlify
 
-Norte-kpi ya está conectado a Netlify vía GitHub (`MarketingTaquion/norte-kpi`
-→ sitio `norte-kpi`, team `Marketing-Taquion-IGNITE`): cada push a `master`
-dispara un build automático. Esta guía cubre tanto ese flujo normal como cómo
-levantar la conexión desde cero si hiciera falta (por ejemplo, un fork o un
-sitio nuevo).
+> **Netlify es secundaria desde 2026-09-17** — [Vercel](deploy-to-vercel.md)
+> es la plataforma principal. Netlify cobra el build contra una cuota de
+> créditos del plan, y con pushes frecuentes ese consumo se nota — por eso
+> **cualquier deploy a Netlify necesita confirmación explícita antes de
+> dispararse**, no es automático como Vercel. Esta página documenta cómo
+> hacerlo cuando sí haga falta (ej. comparar builds, un fallback puntual).
+
+Norte-kpi sigue conectado a Netlify vía GitHub (`MarketingTaquion/norte-kpi`
+→ sitio `norte-kpi`, team `Marketing-Taquion-IGNITE`), pero el auto-deploy en
+cada push está pensado para quedar pausado — confirmar el estado real en el
+dashboard antes de asumir que un push allá disparó algo. Esta guía cubre tanto
+el flujo normal como cómo levantar la conexión desde cero si hiciera falta.
 
 ## Deploy normal (ya conectado)
 

@@ -3,9 +3,23 @@
 Dos endpoints para que herramientas externas (n8n, un CRM, un backend propio)
 generen una estimación o auditen un KPI sin pasar por el wizard del browser.
 Son públicos en el sentido de "alcanzables desde internet", pero requieren
-autenticación — no son lo mismo que la Netlify Function interna del wizard
-(ver [reference: Netlify Function `claude.js`](netlify-function.md), que no
-requiere key porque solo la llama el propio frontend).
+autenticación — no son lo mismo que la función proxy interna del wizard (ver
+[reference: `/api/claude`](netlify-function.md), que no requiere key porque
+solo la llama el propio frontend).
+
+Cada endpoint tiene una implementación por plataforma de deploy, con
+**contrato idéntico** (mismo request, misma response, mismos códigos de
+error) — la diferencia es solo dónde vive el código:
+
+| Plataforma | `kpi-estimate` | `kpi-evaluate` |
+|---|---|---|
+| Vercel (principal) | [`api/kpi-estimate.js`](../../api/kpi-estimate.js) | [`api/kpi-evaluate.js`](../../api/kpi-evaluate.js) |
+| Netlify (secundaria) | [`netlify/functions/kpi-estimate.js`](../../netlify/functions/kpi-estimate.js) | [`netlify/functions/kpi-evaluate.js`](../../netlify/functions/kpi-evaluate.js) |
+
+Ambas comparten la misma lógica de negocio desde `src/lib/` (armado de
+prompts, llamada a Anthropic, auth) — nada de esto está duplicado entre
+plataformas, solo el archivo de entrada que Vercel/Netlify esperan en su
+propia convención.
 
 ## Auth
 
@@ -16,9 +30,10 @@ X-Api-Key: <NORTE_API_KEY>
 ```
 
 `NORTE_API_KEY` es una key propia de Norte-kpi (no la de Anthropic), cargada
-en Netlify → Project configuration → Environment variables. Es una sola key
-compartida para todas las integraciones en v1 — no hay keys por integración
-todavía (ver `docs/SPEC.md`, roadmap).
+en las Environment Variables del proyecto en Vercel (o Netlify, si el deploy
+que estás llamando es ese) — ver [deploy-to-vercel.md](../how-to/deploy-to-vercel.md).
+Es una sola key compartida para todas las integraciones en v1 — no hay keys
+por integración todavía (ver `docs/SPEC.md`, roadmap).
 
 Sin el header, o con un valor que no matchea: `401`.
 Si `NORTE_API_KEY` no está configurada en el sitio: `500` (la API queda
@@ -29,7 +44,7 @@ deshabilitada hasta que se cargue, no falla en modo abierto).
 Genera una estimación de KPIs — el mismo resultado que produce el wizard del
 Seteador al llegar al paso 7, sin la interacción paso a paso.
 
-Función real: [`netlify/functions/kpi-estimate.js`](../../netlify/functions/kpi-estimate.js).
+Función real: [`api/kpi-estimate.js`](../../api/kpi-estimate.js) (Vercel) / [`netlify/functions/kpi-estimate.js`](../../netlify/functions/kpi-estimate.js) (Netlify).
 Prompt: [`SETTER_SYSTEM_PROMPT`](../../src/prompts/setter.js) — ver
 [schema de salida completo](prompts-output-schema.md#seteador--setter_system_prompt).
 
@@ -89,7 +104,7 @@ el número crudo que devolvió la IA — ver
 Audita un KPI ya redactado — el mismo resultado que produce el formulario del
 Evaluador.
 
-Función real: [`netlify/functions/kpi-evaluate.js`](../../netlify/functions/kpi-evaluate.js).
+Función real: [`api/kpi-evaluate.js`](../../api/kpi-evaluate.js) (Vercel) / [`netlify/functions/kpi-evaluate.js`](../../netlify/functions/kpi-evaluate.js) (Netlify).
 Prompt: [`EVALUATOR_SYSTEM_PROMPT`](../../src/prompts/evaluator.js) — ver
 [schema de salida completo](prompts-output-schema.md#evaluador--evaluator_system_prompt).
 

@@ -3,11 +3,12 @@
 Herramienta interna de Taquion/Ignite: traduce pedidos coloquiales de
 clientes en estimaciones de KPIs con proyección financiera y pacing
 (Seteador), y audita de forma independiente un KPI antes de presentarlo al
-cliente (Evaluador). React + Vite + Netlify Functions.
+cliente (Evaluador). React + Vite + funciones serverless (Vercel Functions
+como plataforma principal, Netlify Functions como secundaria).
 
-- **Sitio**: [norte-kpi.netlify.app](https://norte-kpi.netlify.app)
 - **Documentación completa**: [`docs/index.md`](docs/index.md)
 - **API pública** (para integrar otras herramientas): [`docs/reference/api.md`](docs/reference/api.md)
+- **Deploy**: [Vercel](docs/how-to/deploy-to-vercel.md) es la plataforma principal (auto-deploy en cada push). [Netlify](docs/how-to/deploy-to-netlify.md) queda como secundaria, requiere confirmación antes de deployar ahí.
 
 ## Quick start
 

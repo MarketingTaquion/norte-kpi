@@ -7,7 +7,7 @@ export function checkApiKey(event) {
     return {
       ok: false,
       statusCode: 500,
-      message: 'NORTE_API_KEY no está configurada en Netlify. La API pública está deshabilitada hasta que se cargue.',
+      message: 'NORTE_API_KEY no está configurada en el servidor. La API pública está deshabilitada hasta que se cargue.',
     };
   }
 

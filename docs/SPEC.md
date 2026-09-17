@@ -42,9 +42,17 @@ system y todo el detalle técnico.
 
 ## Checklist de lanzamiento
 
-- [ ] `ANTHROPIC_API_KEY` cargada en Netlify (Production + Preview) — ver [how-to: deploy](how-to/deploy-to-netlify.md)
+- [ ] `ANTHROPIC_API_KEY` y `NORTE_API_KEY` cargadas en Vercel (Production + Preview) — ver [how-to: deploy a Vercel](how-to/deploy-to-vercel.md)
 - [ ] `.env.local` nunca commiteado (verificar `.gitignore`)
 - [ ] `netlify dev` local: wizard completo genera JSON válido, Evaluador devuelve veredicto
 - [ ] Probar sin presupuesto (KPIs referenciales, sin Tax Check) y con presupuesto (Tax Check correcto)
 - [ ] Probar los 4 veredictos del Evaluador
 - [ ] Acceso restringido configurado antes de compartir la URL con el equipo
+
+## Nota sobre plataforma de deploy
+
+Desde 2026-09-17, **Vercel es la plataforma principal** (auto-deploy en cada
+push a `master`) — Netlify quedó conectada como secundaria porque cobra el
+build contra una cuota de créditos y con pushes frecuentes eso se nota.
+Cualquier deploy a Netlify requiere confirmación explícita antes de
+dispararse. Ver [explanation: arquitectura](explanation/architecture.md#por-qué-dos-plataformas-de-deploy-vercel--netlify).
