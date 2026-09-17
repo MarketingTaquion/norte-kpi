@@ -6,6 +6,7 @@ clientes en estimaciones de KPIs con proyección financiera y pacing
 cliente (Evaluador). React + Vite + funciones serverless (Vercel Functions
 como plataforma principal, Netlify Functions como secundaria).
 
+- **Sitio**: [norte-kpi.vercel.app](https://norte-kpi.vercel.app)
 - **Documentación completa**: [`docs/index.md`](docs/index.md)
 - **API pública** (para integrar otras herramientas): [`docs/reference/api.md`](docs/reference/api.md)
 - **Deploy**: [Vercel](docs/how-to/deploy-to-vercel.md) es la plataforma principal (auto-deploy en cada push). [Netlify](docs/how-to/deploy-to-netlify.md) queda como secundaria, requiere confirmación antes de deployar ahí.
