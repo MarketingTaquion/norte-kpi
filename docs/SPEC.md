@@ -1,4 +1,4 @@
-# Norte — Spec Técnica
+# Norte-kpi — Spec Técnica
 
 Taquion / Ignite — documento interno · v1.0 · Septiembre 2026
 
@@ -7,9 +7,9 @@ propia, escrita contra el código que efectivamente se construyó — no es una 
 del documento original, que traía contenido de otras auditorías/proyectos que no
 correspondían a esta herramienta.
 
-## 1. Qué calcula Norte
+## 1. Qué calcula Norte-kpi
 
-Norte es la herramienta interna de Taquion/Ignite para que el equipo comercial
+Norte-kpi es la herramienta interna de Taquion/Ignite para que el equipo comercial
 convierta un pedido coloquial de cliente ("quiero más leads", "necesito bajar el
 CPA") en una **estimación de KPIs técnicos con proyección financiera y pacing**, y
 para que el Líder de Ignite **audite de forma independiente** cualquier KPI antes
@@ -73,7 +73,7 @@ llega al browser.
 
 ## 4. Diseño — Taquion 2026 Design System
 
-La primera versión de Norte usaba una paleta oscura ad-hoc ("fire/green/amber")
+La primera versión de Norte-kpi usaba una paleta oscura ad-hoc ("fire/green/amber")
 inventada para el prototipo. Se reemplazó por los tokens reales de marca, tomados
 de `Taquion 2026 Design System/tokens/*.css` (fuente de verdad — no se
 inventó ningún valor):
@@ -97,7 +97,7 @@ hardcodeados fuera de esos dos archivos.
 
 ## 5. Motor de cálculo — estimaciones, cotizaciones y proyecciones
 
-Esta es la pieza que Norte existe para resolver: traducir un pedido coloquial en
+Esta es la pieza que Norte-kpi existe para resolver: traducir un pedido coloquial en
 un número accionable con soporte financiero. Tiene tres componentes, cada uno con
 una responsabilidad distinta y un nivel de confianza distinto.
 
