@@ -1,0 +1,134 @@
+/* Taquion 2026 — design tokens. Copiado de la fuente de verdad de marca
+   (Taquion 2026 Design System/tokens/*.css). No inventar valores acá:
+   si falta un token, se trae del sistema, no se aproxima. */
+
+@font-face{font-family:"Archivo";src:url("/fonts/Archivo-Regular.ttf") format("truetype");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Archivo";src:url("/fonts/Archivo-Medium.ttf") format("truetype");font-weight:500;font-style:normal;font-display:swap}
+@font-face{font-family:"Archivo";src:url("/fonts/Archivo-SemiBold.ttf") format("truetype");font-weight:600;font-style:normal;font-display:swap}
+@font-face{font-family:"Archivo";src:url("/fonts/Archivo-Bold.ttf") format("truetype");font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:"Archivo";src:url("/fonts/Archivo-Black.ttf") format("truetype");font-weight:900;font-style:normal;font-display:swap}
+
+:root{
+  /* Base institucional */
+  --tq-negro:#000000;
+  --tq-blanco:#FFFFFF;
+
+  /* Grises */
+  --tq-gris-profesional:#2D2D2D;
+  --tq-gris-interaccion:#999999;
+  --tq-gris-interaccion-oscuro:#3D3D3D;
+  --tq-gris-calma:#D4D4D7;
+
+  /* Acentos */
+  --tq-fucsia:#FF00B8;
+  --tq-naranja:#FFA900;
+  --tq-azul:#0026FF;
+
+  /* Stops del gradiente Comunidad */
+  --tq-gradiente-inicio:#FF00A8;
+  --tq-gradiente-fin:#FF9F00;
+  --tq-gradiente-dato-fin:#FFC61A;
+
+  /* Escala neutra derivada */
+  --tq-gris-050:#F5F5F6;
+  --tq-gris-100:#EBEBED;
+  --tq-gris-200:#D4D4D7;
+  --tq-gris-400:#999999;
+  --tq-gris-600:#666666;
+  --tq-gris-800:#3D3D3D;
+  --tq-gris-900:#2D2D2D;
+
+  --tq-gradiente-comunidad:linear-gradient(135deg,var(--tq-gradiente-inicio) 0%,var(--tq-gradiente-fin) 100%);
+  --tq-gradiente-comunidad-recto:linear-gradient(90deg,var(--tq-gradiente-inicio) 0%,var(--tq-gradiente-fin) 100%);
+  --tq-gradiente-comunidad-v:linear-gradient(180deg,var(--tq-gradiente-inicio) 0%,var(--tq-gradiente-fin) 100%);
+  --tq-gradiente-interaccion:linear-gradient(180deg,var(--tq-gris-interaccion) 0%,var(--tq-gris-interaccion-oscuro) 100%);
+
+  /* Alias semánticos — consumir siempre estos en componentes */
+  --tq-text-strong:var(--tq-negro);
+  --tq-text-body:var(--tq-gris-900);
+  --tq-text-muted:var(--tq-gris-600);
+  --tq-text-faint:var(--tq-gris-400);
+  --tq-text-inverse:var(--tq-blanco);
+  --tq-text-link:var(--tq-azul);
+  --tq-text-accent:var(--tq-fucsia);
+
+  --tq-surface-page:var(--tq-blanco);
+  --tq-surface-subtle:var(--tq-gris-050);
+  --tq-surface-card:var(--tq-blanco);
+  --tq-surface-plate:var(--tq-gris-900);
+  --tq-surface-deep:var(--tq-negro);
+  --tq-surface-accent:var(--tq-gradiente-comunidad);
+
+  --tq-line:var(--tq-gris-200);
+  --tq-line-strong:var(--tq-gris-900);
+  --tq-line-inverse:rgba(255,255,255,.24);
+
+  --tq-action-bg:var(--tq-negro);
+  --tq-action-fg:var(--tq-blanco);
+  --tq-action-bg-hover:var(--tq-gris-900);
+  --tq-action-bg-active:var(--tq-gris-800);
+  --tq-action-secondary-fg:var(--tq-negro);
+  --tq-action-secondary-line:var(--tq-negro);
+  --tq-action-secondary-bg-hover:var(--tq-gris-100);
+  --tq-action-disabled-bg:var(--tq-gris-200);
+  --tq-action-disabled-fg:var(--tq-gris-400);
+
+  --tq-state-info:var(--tq-azul);
+  --tq-state-attention:var(--tq-naranja);
+  --tq-state-signal:var(--tq-fucsia);
+  --tq-state-neutral:var(--tq-gris-600);
+  --tq-state-success:#0A8A4A;
+  --tq-state-danger:#D6003E;
+
+  /* Tipografía */
+  --tq-font-core:"Archivo","Archivo Fallback",system-ui,sans-serif;
+  --tq-weight-regular:400;
+  --tq-weight-medium:500;
+  --tq-weight-semibold:600;
+  --tq-weight-bold:700;
+  --tq-weight-black:900;
+
+  --tq-size-h1:44px;
+  --tq-size-h2:28px;
+  --tq-size-h3:20px;
+  --tq-size-body:15px;
+  --tq-size-small:13px;
+  --tq-size-eyebrow:12px;
+
+  --tq-leading-heading:1.15;
+  --tq-leading-body:1.55;
+  --tq-tracking-caps:0.08em;
+
+  /* Spacing — unidad base 8px */
+  --tq-space-1:4px;
+  --tq-space-2:8px;
+  --tq-space-3:16px;
+  --tq-space-4:24px;
+  --tq-space-5:32px;
+  --tq-space-6:48px;
+  --tq-margin-desktop:64px;
+  --tq-container:1280px;
+
+  /* Shape */
+  --tq-radius-none:0px;
+  --tq-radius-sm:4px;
+  --tq-radius-md:8px;
+  --tq-radius-full:999px;
+  --tq-border-hairline:1px;
+  --tq-border-strong:2px;
+  --tq-shadow-raised:0 1px 2px rgba(0,0,0,.08);
+  --tq-shadow-overlay:0 24px 64px rgba(0,0,0,.28);
+  --tq-focus-ring:0 0 0 3px rgba(0,38,255,.14);
+
+  /* Motion */
+  --tq-duration-fast:140ms;
+  --tq-duration-base:220ms;
+  --tq-ease-standard:cubic-bezier(.2,0,.2,1);
+  --tq-transition-ui:background-color var(--tq-duration-fast) var(--tq-ease-standard),
+    color var(--tq-duration-fast) var(--tq-ease-standard),
+    border-color var(--tq-duration-fast) var(--tq-ease-standard),
+    box-shadow var(--tq-duration-fast) var(--tq-ease-standard);
+}
+
+a{color:var(--tq-text-link);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
+a:hover{color:var(--tq-fucsia)}
