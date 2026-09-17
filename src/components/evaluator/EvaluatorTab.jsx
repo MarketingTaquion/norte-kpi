@@ -1,36 +1,29 @@
 import { useEvaluatorForm } from '../../hooks/useEvaluatorForm.js';
 import { useClaude } from '../../hooks/useClaude.js';
 import { EVALUATOR_SYSTEM_PROMPT } from '../../prompts/evaluator.js';
-import { PLATFORM_GROUPS } from '../../data/platforms.js';
-import { LAPSOS } from '../../data/lapsos.js';
+import { buildEvaluatorUserPrompt } from '../../lib/promptBuilders.js';
 import EvaluatorForm from './EvaluatorForm.jsx';
 import EvaluatorResult from './EvaluatorResult.jsx';
 
-function buildUserPrompt(form) {
-  const cliente = form.clients.find((c) => c.value === form.clientValue)?.label || 'Sin cliente específico';
-  const plataformas = form.platformValues
-    .map((v) => PLATFORM_GROUPS.flatMap((g) => g.items).find((p) => p.value === v)?.label)
-    .filter(Boolean);
-  const periodo = form.periodMode === 'lapso'
-    ? LAPSOS.find((l) => l.value === form.lapsoValue)?.label || 'No definido'
-    : (form.fechaInicio && form.fechaFin ? `${form.fechaInicio} a ${form.fechaFin}` : 'No definido');
-
-  const lines = [
-    `Cliente: ${cliente}`,
-    `Plataformas: ${plataformas.length ? plataformas.join(', ') : 'No especificadas'}`,
-    `KPI declarado (SMART):`,
-    `  S - Acción: ${form.accion}`,
-    `  M - Indicador: ${form.indicador}`,
-    `  A - Por qué es alcanzable: ${form.alcanzable || 'No declarado'}`,
-    `  R - Segmento: ${form.segmento}`,
-    `  T - Período: ${periodo}`,
-    `Presupuesto bruto: ${form.presupuesto || '0'} ${form.moneda}`,
-    `CPC/CPA referencia: ${form.cpcCpaRef || 'No declarado'}`,
-    `CPM referencia: ${form.cpmRef || 'No declarado'}`,
-    `Contexto adicional: ${form.contexto || 'Ninguno'}`,
-  ];
-
-  return lines.join('\n');
+// Mismo shape que espera /api/kpi-evaluate en el body — un solo lugar
+// construye el texto del prompt, lo use el formulario o una herramienta externa.
+function formToFields(form) {
+  return {
+    cliente: form.clients.find((c) => c.value === form.clientValue)?.label,
+    plataformas: form.platformValues,
+    accion: form.accion,
+    indicador: form.indicador,
+    alcanzable: form.alcanzable,
+    segmento: form.segmento,
+    periodo: form.periodMode === 'lapso'
+      ? { lapso: form.lapsoValue }
+      : { desde: form.fechaInicio, hasta: form.fechaFin },
+    presupuesto: form.presupuesto,
+    moneda: form.moneda,
+    cpcCpaRef: form.cpcCpaRef,
+    cpmRef: form.cpmRef,
+    contexto: form.contexto,
+  };
 }
 
 export default function EvaluatorTab() {
@@ -38,7 +31,7 @@ export default function EvaluatorTab() {
   const { data, loading, error, call } = useClaude();
 
   const handleSubmit = () => {
-    const userPrompt = buildUserPrompt(form);
+    const userPrompt = buildEvaluatorUserPrompt(formToFields(form));
     call(EVALUATOR_SYSTEM_PROMPT, userPrompt, 4000);
   };
 

@@ -1,7 +1,15 @@
 # Netlify Function `claude.js` — contrato de la API interna
 
-Única función serverless del proyecto. Código fuente:
-[`netlify/functions/claude.js`](../../netlify/functions/claude.js).
+Función serverless que usa el wizard del browser (Seteador y Evaluador vía
+[`useClaude.js`](../../src/hooks/useClaude.js)). Código fuente:
+[`netlify/functions/claude.js`](../../netlify/functions/claude.js). No
+requiere API key propia — solo la llama el propio frontend, igual que el
+primer día de este proyecto.
+
+Es distinta de la [API pública](api.md) (`kpi-estimate.js` / `kpi-evaluate.js`):
+esas sí requieren `X-Api-Key`, están pensadas para herramientas externas, y
+devuelven JSON ya parseado y validado en vez del wrapper crudo de Anthropic
+que devuelve esta.
 
 - **Endpoint (local con `netlify dev`)**: `http://localhost:8888/.netlify/functions/claude`
 - **Endpoint (producción)**: `https://<tu-sitio>.netlify.app/.netlify/functions/claude`

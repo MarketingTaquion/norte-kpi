@@ -3,4 +3,5 @@ dist
 .env
 .env.local
 .netlify
+deno.lock
 *.log

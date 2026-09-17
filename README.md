@@ -7,6 +7,7 @@ cliente (Evaluador). React + Vite + Netlify Functions.
 
 - **Sitio**: [norte-kpi.netlify.app](https://norte-kpi.netlify.app)
 - **Documentación completa**: [`docs/index.md`](docs/index.md)
+- **API pública** (para integrar otras herramientas): [`docs/reference/api.md`](docs/reference/api.md)
 
 ## Quick start
 

@@ -21,10 +21,12 @@ probablemente esté en otra categoría de esta misma lista.
 - [Correr el proxy de Claude en local con Netlify Dev](how-to/run-locally-with-netlify-dev.md)
 - [Deployar a Netlify](how-to/deploy-to-netlify.md)
 - [Actualizar benchmarks y reglas de negocio de los prompts](how-to/update-kpi-rules-and-benchmarks.md)
+- [Integrar una herramienta externa (API pública)](how-to/integrate-external-tool.md)
 
 ## Reference
 
 - [Estructura del repositorio](reference/repository-structure.md)
+- [API pública — `/api/kpi-estimate` y `/api/kpi-evaluate`](reference/api.md)
 - [Netlify Function `claude.js` — contrato de la API interna](reference/netlify-function.md)
 - [Schema de salida de los prompts (Seteador / Evaluador)](reference/prompts-output-schema.md)
 - [Datos de configuración (clientes, etapas, plataformas, lapsos)](reference/configuration-data.md)
