@@ -676,6 +676,58 @@ table.kpi-table td {
   font-weight: var(--tq-weight-semibold);
 }
 
+/* --- Range meter: barra flotante min-max (estilo "Estimated daily results") --- */
+.range-meter {
+  margin-top: 6px;
+  max-width: 160px;
+}
+
+.range-meter-track {
+  position: relative;
+  height: 6px;
+  border-radius: var(--tq-radius-full);
+  background: var(--tq-gris-100);
+  overflow: hidden;
+}
+
+.range-meter-fill {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  border-radius: var(--tq-radius-full);
+  background: var(--tq-negro);
+}
+
+/* --- Gauge de confianza (estilo "Audience definition") --- */
+.gauge {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.gauge svg {
+  display: block;
+}
+
+.gauge-labels {
+  display: flex;
+  justify-content: space-between;
+  width: 150px;
+  margin-top: -6px;
+  font-size: 11px;
+  color: var(--tq-text-faint);
+  text-transform: uppercase;
+  letter-spacing: var(--tq-tracking-caps);
+}
+
+.gauge-value {
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: var(--tq-weight-semibold);
+  color: var(--tq-text-muted);
+}
+
 .viability-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);

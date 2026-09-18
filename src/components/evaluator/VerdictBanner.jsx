@@ -1,3 +1,5 @@
+import ConfidenceGauge from '../shared/ConfidenceGauge.jsx';
+
 const LABELS = {
   APROBADO: 'Aprobado',
   RECHAZADO_VANIDAD: 'Rechazado — Vanidad',
@@ -12,7 +14,7 @@ export default function VerdictBanner({ veredicto, confianza }) {
     <div className={cls}>
       <div className="banner-title">Veredicto</div>
       <div className="banner-value">{LABELS[veredicto] || veredicto}</div>
-      {confianza != null ? <div className="banner-sub">Confianza: {confianza}%</div> : null}
+      {confianza != null ? <ConfidenceGauge confianza={confianza} /> : null}
     </div>
   );
 }

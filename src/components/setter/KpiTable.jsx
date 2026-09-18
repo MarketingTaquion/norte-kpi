@@ -1,3 +1,5 @@
+import RangeMeter from '../shared/RangeMeter.jsx';
+
 export default function KpiTable({ kpis }) {
   if (!kpis || kpis.length === 0) return null;
   return (
@@ -26,8 +28,9 @@ export default function KpiTable({ kpis }) {
                 </td>
                 <td>{k.fuente_verdad}</td>
                 <td>{k.meta_realista}</td>
-                <td style={{ fontVariantNumeric: 'tabular-nums' }}>
+                <td style={{ fontVariantNumeric: 'tabular-nums', minWidth: 120 }}>
                   {k.proyeccion_min} – {k.proyeccion_max}
+                  <RangeMeter min={k.proyeccion_min} max={k.proyeccion_max} />
                 </td>
               </tr>
             ))}
