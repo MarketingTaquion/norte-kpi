@@ -64,7 +64,7 @@ X-Api-Key: <NORTE_API_KEY>
 | `pedidos` | `string[]` \| `{ texto: string, categoria: string }[]` | **Sí** (mín. 1 no vacío) | Pedidos en lenguaje coloquial. El wizard siempre manda `{ texto, categoria }` — `categoria` es un value de [`CATEGORY_OPTIONS`](calculator.md) (ej. `"leads"`) y fija la fórmula/benchmark sin adivinar. Un string plano sigue soportado para integraciones que no manden `categoria` — se clasifica por keywords con `classifyText()` |
 | `etapas` | `string[]` | No | Values de [`STAGES`](configuration-data.md#srcdatastagesjs--stages) (ej. `"comunidad-captacion"`) |
 | `periodo` | `{ lapso: string }` \| `{ desde: string, hasta: string }` | No | `lapso` es un value de [`LAPSOS`](configuration-data.md#srcdatalapsosjs--lapsos) (ej. `"mes-1"`); `desde`/`hasta` son fechas `YYYY-MM-DD` |
-| `presupuesto` | `number` | No | Bruto. Si se omite, se devuelven rangos de benchmark referenciales sin Tax Check |
+| `presupuesto` | `number` | No | Bruto. Si se omite, se devuelven rangos de benchmark referenciales sin Tax Check. El wizard solo ofrece `5000000`, `10000000` o `12000000` (o vacío) vía [`PRESUPUESTO_OPTIONS`](../../src/data/presupuestos.js) — pero la API/la calculadora no validan ese límite, cualquier número positivo es aceptado |
 | `moneda` | `"ARS"` \| `"USD"` | No | Default `"ARS"` |
 | `plataformas` | `string[]` | No | Values de [`PLATFORM_GROUPS`](configuration-data.md#srcdataplatformsjs--platform_groups) (ej. `"meta-ads"`) |
 | `nsm` | `string` | No | North Star Metric declarada; si se omite, se infiere del KPI técnico más repetido entre los pedidos |
@@ -125,7 +125,7 @@ X-Api-Key: <NORTE_API_KEY>
 | `plataformas` | `string[]` | No | Values de [`PLATFORM_GROUPS`](configuration-data.md#srcdataplatformsjs--platform_groups) |
 | `alcanzable` | `string` | No | Evidencia de alcanzabilidad |
 | `periodo` | `{ lapso: string }` \| `{ desde, hasta }` | No | Si se omite, el veredicto puede ser `CONDICIONADO` |
-| `presupuesto` | `number` | No | Bruto. Sin esto, el veredicto no puede ser `RECHAZADO_INVIABILIDAD` |
+| `presupuesto` | `number` | No | Bruto. Sin esto, el veredicto no puede ser `RECHAZADO_INVIABILIDAD`. El wizard solo ofrece `5000000`, `10000000` o `12000000` (o vacío) vía [`PRESUPUESTO_OPTIONS`](../../src/data/presupuestos.js) — la API acepta cualquier número positivo |
 | `moneda` | `"ARS"` \| `"USD"` | No | Default `"ARS"` |
 | `cpcCpaRef` / `cpmRef` | `string` | No | Datos históricos para calibrar viabilidad |
 | `contexto` | `string` | No | Estacionalidad, competencia, restricciones |

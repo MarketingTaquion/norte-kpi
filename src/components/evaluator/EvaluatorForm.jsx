@@ -3,6 +3,7 @@ import PeriodPicker from '../shared/PeriodPicker.jsx';
 import { PLATFORM_GROUPS } from '../../data/platforms.js';
 import { CATEGORY_OPTIONS } from '../../lib/calculator/kpiCatalog.js';
 import { ACCION_OPTIONS } from '../../lib/calculator/evaluatorCalculator.js';
+import { PRESUPUESTO_OPTIONS } from '../../data/presupuestos.js';
 
 export default function EvaluatorForm({ form, onSubmit, loading }) {
   return (
@@ -87,7 +88,11 @@ export default function EvaluatorForm({ form, onSubmit, loading }) {
         <div className="budget-row">
           <div className="field" style={{ marginBottom: 0 }}>
             <label className="field-label">Presupuesto bruto</label>
-            <input type="number" placeholder="0 = sin presupuesto declarado" value={form.presupuesto} onChange={(e) => form.setPresupuesto(e.target.value)} />
+            <select value={form.presupuesto} onChange={(e) => form.setPresupuesto(e.target.value)}>
+              {PRESUPUESTO_OPTIONS.map((p) => (
+                <option key={p.value} value={p.value}>{p.label}</option>
+              ))}
+            </select>
           </div>
           <div className="field" style={{ marginBottom: 0 }}>
             <label className="field-label">Moneda</label>

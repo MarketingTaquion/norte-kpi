@@ -8,6 +8,7 @@ import { PLATFORM_GROUPS } from '../../data/platforms.js';
 import { LAPSOS } from '../../data/lapsos.js';
 import { fmtN } from '../../utils/tax.js';
 import { CATEGORY_OPTIONS } from '../../lib/calculator/kpiCatalog.js';
+import { PRESUPUESTO_OPTIONS } from '../../data/presupuestos.js';
 
 const STEPS = [
   { key: 'cliente', eyebrow: 'Paso 1 · Contexto', title: '¿Para qué cliente es esta estimación?' },
@@ -138,12 +139,11 @@ export default function SetterWizard({ form, onComplete, loading }) {
             <div className="budget-row">
               <div className="field" style={{ marginBottom: 0 }}>
                 <label className="field-label">Presupuesto bruto</label>
-                <input
-                  type="number"
-                  placeholder="0 = sin presupuesto, KPIs referenciales"
-                  value={form.presupuesto}
-                  onChange={(e) => form.setPresupuesto(e.target.value)}
-                />
+                <select value={form.presupuesto} onChange={(e) => form.setPresupuesto(e.target.value)}>
+                  {PRESUPUESTO_OPTIONS.map((p) => (
+                    <option key={p.value} value={p.value}>{p.label}</option>
+                  ))}
+                </select>
               </div>
               <div className="field" style={{ marginBottom: 0 }}>
                 <label className="field-label">Moneda</label>
