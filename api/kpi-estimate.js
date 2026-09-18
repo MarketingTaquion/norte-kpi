@@ -17,13 +17,15 @@ export default function handler(req, res) {
   }
 
   const payload = req.body || {};
+  // Cada pedido puede ser un string (se clasifica por keywords) o
+  // { texto, categoria } (categoria explícita, igual que manda el wizard).
   const pedidosValidos = Array.isArray(payload.pedidos)
-    ? payload.pedidos.filter((p) => typeof p === 'string' && p.trim().length > 0)
+    ? payload.pedidos.filter((p) => (typeof p === 'string' && p.trim()) || (p && typeof p.texto === 'string' && p.texto.trim()))
     : [];
 
   if (!payload.cliente || pedidosValidos.length === 0) {
     res.status(422).json({
-      error: 'Faltan campos obligatorios: "cliente" (string) y al menos un item en "pedidos" (array de strings).',
+      error: 'Faltan campos obligatorios: "cliente" (string) y al menos un item en "pedidos" (string, o { texto, categoria }).',
     });
     return;
   }

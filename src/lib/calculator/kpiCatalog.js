@@ -100,6 +100,26 @@ export const CATEGORIES = [
 
 export const DEFAULT_CATEGORY = CATEGORIES.find((c) => c.key === 'conversion');
 
+// Labels cortos para el select de "Métrica" en el formulario — separados de
+// kpi_tecnico (que es más largo y técnico, pensado para la tabla de resultado).
+const CATEGORY_LABELS = {
+  ventas: 'Ventas / ROAS',
+  leads: 'Leads',
+  trafico: 'Tráfico / Clics',
+  alcance: 'Alcance / Awareness',
+  engagement: 'Engagement',
+  seguidores: 'Seguidores / Audiencia',
+  retencion: 'Retención / Churn',
+  setup: 'Setup / Implementación',
+  conversion: 'Conversión (genérico)',
+};
+
+export const CATEGORY_OPTIONS = CATEGORIES.map((c) => ({ value: c.key, label: CATEGORY_LABELS[c.key] || c.key }));
+
+export function findCategory(key) {
+  return CATEGORIES.find((c) => c.key === key) || null;
+}
+
 export function classifyText(text) {
   for (const category of CATEGORIES) {
     if (containsAny(text, category.keywords)) return category;

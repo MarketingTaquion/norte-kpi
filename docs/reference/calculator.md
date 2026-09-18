@@ -7,9 +7,18 @@ o qué benchmark usa cada categoría, está acá.
 
 ## Categorías — `kpiCatalog.js`
 
-Se evalúan en este orden; gana la primera cuyas keywords aparecen en el
-texto (`accion` + `indicador` para el Evaluador, cada `pedido` para el
-Seteador):
+Ambos formularios (Seteador y Evaluador) tienen un select obligatorio
+**Métrica**, poblado con `CATEGORY_OPTIONS` — el usuario elige la categoría
+explícitamente en vez de depender de que el texto libre matchee una keyword.
+`findCategory(categoria)` resuelve ese value; si no hay `categoria` (por
+ejemplo, una integración de la API que todavía manda solo texto plano), se
+cae a `classifyText()` como fallback. En el Seteador cada `pedido` tiene su
+propia `categoria` (fila `{ texto, categoria }`); en el Evaluador es un solo
+campo a nivel formulario.
+
+Orden de `classifyText()` cuando no hay `categoria` explícita: gana la
+primera keyword que matchea en el texto (`accion` + `indicador` para el
+Evaluador, cada `pedido` para el Seteador):
 
 | Categoría | Keywords (ejemplos) | SOP | KPI técnico | `modo` de proyección |
 |---|---|---|---|---|

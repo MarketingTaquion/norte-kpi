@@ -7,6 +7,7 @@ import { STAGES } from '../../data/stages.js';
 import { PLATFORM_GROUPS } from '../../data/platforms.js';
 import { LAPSOS } from '../../data/lapsos.js';
 import { fmtN } from '../../utils/tax.js';
+import { CATEGORY_OPTIONS } from '../../lib/calculator/kpiCatalog.js';
 
 const STEPS = [
   { key: 'cliente', eyebrow: 'Paso 1 · Contexto', title: '¿Para qué cliente es esta estimación?' },
@@ -27,7 +28,10 @@ export default function SetterWizard({ form, onComplete, loading }) {
 
   const stepValid = (() => {
     if (STEPS[step].key === 'cliente') return Boolean(form.clientValue);
-    if (STEPS[step].key === 'pedidos') return form.pedidos.some((p) => p.trim().length > 0);
+    if (STEPS[step].key === 'pedidos') {
+      const conTexto = form.pedidos.filter((p) => p.texto.trim().length > 0);
+      return conTexto.length > 0 && !form.pedidosIncompletos;
+    }
     return true;
   })();
 
@@ -55,7 +59,8 @@ export default function SetterWizard({ form, onComplete, loading }) {
   const periodoLabel = form.periodMode === 'lapso'
     ? LAPSOS.find((l) => l.value === form.lapsoValue)?.label || 'No definido'
     : (form.fechaInicio && form.fechaFin ? `${form.fechaInicio} → ${form.fechaFin}` : 'No definido');
-  const pedidosValidos = form.pedidos.filter((p) => p.trim().length > 0);
+  const pedidosValidos = form.pedidos.filter((p) => p.texto.trim().length > 0);
+  const categoriaLabel = (key) => CATEGORY_OPTIONS.find((c) => c.value === key)?.label || '—';
 
   return (
     <div className="wizard-shell">
@@ -179,17 +184,33 @@ export default function SetterWizard({ form, onComplete, loading }) {
 
         {STEPS[step].key === 'pedidos' && (
           <div>
+            <p className="wizard-step-hint" style={{ marginTop: 0, marginBottom: 14 }}>
+              Cada pedido necesita su métrica — es lo que define la fórmula y el
+              benchmark que se usan para proyectarlo.
+            </p>
             {form.pedidos.map((pedido, i) => (
-              <div key={i} className="pedido-row">
-                <input
-                  type="text"
-                  placeholder={`Pedido ${i + 1} (ej: "quiero más leads")`}
-                  value={pedido}
-                  onChange={(e) => form.updatePedido(i, e.target.value)}
-                />
-                {form.pedidos.length > 1 ? (
-                  <button type="button" className="icon-btn" onClick={() => form.removePedido(i)}>×</button>
-                ) : null}
+              <div key={i} style={{ marginBottom: 12 }}>
+                <div className="pedido-row" style={{ marginBottom: 6 }}>
+                  <input
+                    type="text"
+                    placeholder={`Pedido ${i + 1} (ej: "quiero más leads")`}
+                    value={pedido.texto}
+                    onChange={(e) => form.updatePedidoTexto(i, e.target.value)}
+                  />
+                  {form.pedidos.length > 1 ? (
+                    <button type="button" className="icon-btn" onClick={() => form.removePedido(i)}>×</button>
+                  ) : null}
+                </div>
+                <select
+                  value={pedido.categoria}
+                  onChange={(e) => form.updatePedidoCategoria(i, e.target.value)}
+                  disabled={!pedido.texto.trim()}
+                >
+                  <option value="">Métrica del pedido {i + 1}…</option>
+                  {CATEGORY_OPTIONS.map((c) => (
+                    <option key={c.value} value={c.value}>{c.label}</option>
+                  ))}
+                </select>
               </div>
             ))}
             {form.pedidos.length < form.maxPedidos ? (
@@ -238,7 +259,9 @@ export default function SetterWizard({ form, onComplete, loading }) {
             </div>
             <div className="section-heading">Pedidos a traducir</div>
             <ul className="list-plain">
-              {pedidosValidos.map((p, i) => <li key={i}>{p}</li>)}
+              {pedidosValidos.map((p, i) => (
+                <li key={i}>{p.texto} — <strong>{categoriaLabel(p.categoria)}</strong></li>
+              ))}
             </ul>
           </div>
         )}

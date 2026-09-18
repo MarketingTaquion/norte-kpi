@@ -6,7 +6,7 @@ import { STAGES } from '../../data/stages.js';
 import { PLATFORM_GROUPS } from '../../data/platforms.js';
 import { LAPSOS } from '../../data/lapsos.js';
 import { taxCalc } from '../../utils/tax.js';
-import { classifyText, fuenteDeVerdad } from './kpiCatalog.js';
+import { classifyText, findCategory, fuenteDeVerdad } from './kpiCatalog.js';
 import { BENCHMARKS, midpoint } from './benchmarks.js';
 
 const ALL_PLATFORMS = PLATFORM_GROUPS.flatMap((g) => g.items);
@@ -28,6 +28,14 @@ function diasDelPeriodo(periodo) {
 
 function round(n) {
   return Math.round(n);
+}
+
+// El wizard siempre manda `{ texto, categoria }` (select obligatorio) — se
+// acepta también un string plano para integraciones de la API pública que
+// todavía no mandan `categoria`, con classifyText() como fallback.
+function normalizePedido(p) {
+  if (typeof p === 'string') return { texto: p, categoria: '' };
+  return { texto: p?.texto || '', categoria: p?.categoria || '' };
 }
 
 // Calcula la proyección de un KPI según su "modo" — la parte que reemplaza
@@ -117,7 +125,9 @@ export function calculateSetterResult(fields) {
 
   const etapaLabels = resolveLabels(STAGES, etapas);
   const plataformaLabels = resolveLabels(ALL_PLATFORMS, plataformas);
-  const pedidosValidos = (pedidos || []).map((p) => (p || '').trim()).filter(Boolean);
+  const pedidosValidos = (pedidos || [])
+    .map(normalizePedido)
+    .filter((p) => p.texto.trim().length > 0);
   const dias = diasDelPeriodo(periodo);
 
   const taxCheck = taxCalc(presupuesto || 0);
@@ -127,11 +137,12 @@ export function calculateSetterResult(fields) {
   const setupForzado = etapaLabels.some((l) => l.toLowerCase().startsWith('setup'));
 
   const kpis = pedidosValidos.map((pedido) => {
-    const category = classifyText(pedido);
+    const category = findCategory(pedido.categoria) || classifyText(pedido.texto);
     const sop = setupForzado && category.sop !== 'SOP Ignite' ? 'SOP Setup' : category.sop;
     const { min, max, meta } = proyectarKpi(category, netoPorPedido);
+    const texto = pedido.texto;
     return {
-      pedido_original: pedido.length > 95 ? `${pedido.slice(0, 92)}...` : pedido,
+      pedido_original: texto.length > 95 ? `${texto.slice(0, 92)}...` : texto,
       sop,
       kpi_tecnico: category.kpi_tecnico,
       formula: category.formula,

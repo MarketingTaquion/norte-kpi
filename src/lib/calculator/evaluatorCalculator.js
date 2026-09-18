@@ -4,13 +4,15 @@
 import { PLATFORM_GROUPS } from '../../data/platforms.js';
 import { LAPSOS } from '../../data/lapsos.js';
 import { taxCalc } from '../../utils/tax.js';
-import { classifyText } from './kpiCatalog.js';
+import { classifyText, findCategory } from './kpiCatalog.js';
 import { BENCHMARKS } from './benchmarks.js';
 import { containsAny, firstNumber } from './text.js';
 
 const ALL_PLATFORMS = PLATFORM_GROUPS.flatMap((g) => g.items);
 const PAID_VALUES = PLATFORM_GROUPS.find((g) => g.group === 'Paid / Ads')?.items.map((i) => i.value) || [];
 const VERBOS_SMART = ['captar', 'lograr', 'reducir', 'mantener', 'aumentar', 'generar', 'mejorar', 'incrementar', 'disminuir', 'sostener'];
+// Opciones para el select "Acción (S)" del formulario — el mismo set que valida checkS().
+export const ACCION_OPTIONS = VERBOS_SMART.map((v) => ({ value: v, label: v.charAt(0).toUpperCase() + v.slice(1) }));
 const VANITY_KEYWORDS = ['like', 'me gusta', 'likes', 'cantidad de publicaciones', 'cantidad de posts'];
 
 function round(n) {
@@ -98,10 +100,13 @@ function estimarCostoObjetivo(category, numero, cpcCpaRef) {
 export function calculateEvaluatorResult(fields) {
   const {
     plataformas = [], accion, indicador, alcanzable, segmento, periodo,
-    presupuesto, cpcCpaRef, contexto,
+    presupuesto, cpcCpaRef, contexto, categoria,
   } = fields || {};
 
-  const category = classifyText(`${accion || ''} ${indicador || ''}`);
+  // El formulario siempre manda `categoria` (select obligatorio) — se usa
+  // directo, sin adivinar. classifyText() queda como fallback solo para
+  // integraciones de la API pública que todavía no la mandan.
+  const category = findCategory(categoria) || classifyText(`${accion || ''} ${indicador || ''}`);
   const numero = firstNumber(indicador);
   const esVanidad = containsAny(indicador, VANITY_KEYWORDS) && !containsAny(`${segmento || ''} ${contexto || ''}`, ['venta', 'negocio', 'lead', 'conversion', 'conversión']);
 

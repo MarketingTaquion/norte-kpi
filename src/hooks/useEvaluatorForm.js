@@ -4,6 +4,7 @@ import { DEFAULT_CLIENTS } from '../data/clients.js';
 export function useEvaluatorForm() {
   const [clientValue, setClientValue] = useState('');
   const [platformValues, setPlatformValues] = useState([]);
+  const [categoria, setCategoria] = useState('');
   const [accion, setAccion] = useState('');
   const [indicador, setIndicador] = useState('');
   const [alcanzable, setAlcanzable] = useState('');
@@ -23,12 +24,13 @@ export function useEvaluatorForm() {
   };
 
   const isValid = useMemo(() => {
-    return accion.trim().length > 0 && indicador.trim().length > 0 && segmento.trim().length > 0;
-  }, [accion, indicador, segmento]);
+    return categoria.trim().length > 0 && accion.trim().length > 0 && indicador.trim().length > 0 && segmento.trim().length > 0;
+  }, [categoria, accion, indicador, segmento]);
 
   return {
     clients: DEFAULT_CLIENTS, clientValue, setClientValue,
     platformValues, togglePlatform,
+    categoria, setCategoria,
     accion, setAccion,
     indicador, setIndicador,
     alcanzable, setAlcanzable,

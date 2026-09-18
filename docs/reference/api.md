@@ -61,7 +61,7 @@ X-Api-Key: <NORTE_API_KEY>
 | Campo | Tipo | Obligatorio | Notas |
 |---|---|---|---|
 | `cliente` | `string` | **Sí** | Nombre libre, no necesita matchear `src/data/clients.js` |
-| `pedidos` | `string[]` | **Sí** (mín. 1 no vacío) | Pedidos en lenguaje coloquial |
+| `pedidos` | `string[]` \| `{ texto: string, categoria: string }[]` | **Sí** (mín. 1 no vacío) | Pedidos en lenguaje coloquial. El wizard siempre manda `{ texto, categoria }` — `categoria` es un value de [`CATEGORY_OPTIONS`](calculator.md) (ej. `"leads"`) y fija la fórmula/benchmark sin adivinar. Un string plano sigue soportado para integraciones que no manden `categoria` — se clasifica por keywords con `classifyText()` |
 | `etapas` | `string[]` | No | Values de [`STAGES`](configuration-data.md#srcdatastagesjs--stages) (ej. `"comunidad-captacion"`) |
 | `periodo` | `{ lapso: string }` \| `{ desde: string, hasta: string }` | No | `lapso` es un value de [`LAPSOS`](configuration-data.md#srcdatalapsosjs--lapsos) (ej. `"mes-1"`); `desde`/`hasta` son fechas `YYYY-MM-DD` |
 | `presupuesto` | `number` | No | Bruto. Si se omite, se devuelven rangos de benchmark referenciales sin Tax Check |
@@ -74,7 +74,7 @@ Ejemplo:
 ```json
 {
   "cliente": "Acme SRL",
-  "pedidos": ["Quiero más leads calificados para el equipo comercial"],
+  "pedidos": [{ "texto": "Quiero más leads calificados para el equipo comercial", "categoria": "leads" }],
   "etapas": ["comunidad-captacion"],
   "periodo": { "lapso": "mes-1" },
   "presupuesto": 1000000,
@@ -120,6 +120,7 @@ X-Api-Key: <NORTE_API_KEY>
 | `accion` | `string` | **Sí** | El verbo del KPI (Captar, Lograr, Reducir, Mantener) |
 | `indicador` | `string` | **Sí** | La métrica con número concreto (ej. "500 leads") |
 | `segmento` | `string` | **Sí** | A quién apunta el KPI |
+| `categoria` | `string` | No (recomendado) | Value de [`CATEGORY_OPTIONS`](calculator.md) (ej. `"leads"`) — el wizard siempre la manda como select obligatorio. Si se omite, se infiere por keywords con `classifyText()` sobre `accion` + `indicador` |
 | `cliente` | `string` | No | Solo contexto, no afecta la lógica de auditoría |
 | `plataformas` | `string[]` | No | Values de [`PLATFORM_GROUPS`](configuration-data.md#srcdataplatformsjs--platform_groups) |
 | `alcanzable` | `string` | No | Evidencia de alcanzabilidad |
@@ -136,6 +137,7 @@ Ejemplo:
   "accion": "Captar",
   "indicador": "500 leads calificados",
   "segmento": "Dueños de PyMEs, 35-55 años, CABA",
+  "categoria": "leads",
   "periodo": { "lapso": "mes-1" },
   "presupuesto": 1000000,
   "plataformas": ["meta-ads"]

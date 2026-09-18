@@ -11,6 +11,7 @@ function formToFields(form) {
   return {
     cliente: form.clients.find((c) => c.value === form.clientValue)?.label,
     plataformas: form.platformValues,
+    categoria: form.categoria,
     accion: form.accion,
     indicador: form.indicador,
     alcanzable: form.alcanzable,

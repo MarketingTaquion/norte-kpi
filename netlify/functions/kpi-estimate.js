@@ -19,15 +19,17 @@ exports.handler = async function (event) {
     return { statusCode: 400, body: JSON.stringify({ error: 'Body inválido: no es JSON.' }) };
   }
 
+  // Cada pedido puede ser un string (se clasifica por keywords) o
+  // { texto, categoria } (categoria explícita, igual que manda el wizard).
   const pedidosValidos = Array.isArray(payload.pedidos)
-    ? payload.pedidos.filter((p) => typeof p === 'string' && p.trim().length > 0)
+    ? payload.pedidos.filter((p) => (typeof p === 'string' && p.trim()) || (p && typeof p.texto === 'string' && p.texto.trim()))
     : [];
 
   if (!payload.cliente || pedidosValidos.length === 0) {
     return {
       statusCode: 422,
       body: JSON.stringify({
-        error: 'Faltan campos obligatorios: "cliente" (string) y al menos un item en "pedidos" (array de strings).',
+        error: 'Faltan campos obligatorios: "cliente" (string) y al menos un item en "pedidos" (string, o { texto, categoria }).',
       }),
     };
   }

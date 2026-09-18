@@ -1,6 +1,8 @@
 import ChipItem from '../shared/ChipItem.jsx';
 import PeriodPicker from '../shared/PeriodPicker.jsx';
 import { PLATFORM_GROUPS } from '../../data/platforms.js';
+import { CATEGORY_OPTIONS } from '../../lib/calculator/kpiCatalog.js';
+import { ACCION_OPTIONS } from '../../lib/calculator/evaluatorCalculator.js';
 
 export default function EvaluatorForm({ form, onSubmit, loading }) {
   return (
@@ -36,8 +38,22 @@ export default function EvaluatorForm({ form, onSubmit, loading }) {
       <div className="panel">
         <h3 className="panel-title">KPI a auditar</h3>
         <div className="field">
+          <label className="field-label">Métrica <span className="required">*</span></label>
+          <select value={form.categoria} onChange={(e) => form.setCategoria(e.target.value)}>
+            <option value="">Seleccionar métrica…</option>
+            {CATEGORY_OPTIONS.map((c) => (
+              <option key={c.value} value={c.value}>{c.label}</option>
+            ))}
+          </select>
+        </div>
+        <div className="field">
           <label className="field-label">Acción (S) <span className="required">*</span></label>
-          <input type="text" placeholder="Captar, Lograr, Reducir, Mantener…" value={form.accion} onChange={(e) => form.setAccion(e.target.value)} />
+          <select value={form.accion} onChange={(e) => form.setAccion(e.target.value)}>
+            <option value="">Seleccionar acción…</option>
+            {ACCION_OPTIONS.map((a) => (
+              <option key={a.value} value={a.value}>{a.label}</option>
+            ))}
+          </select>
         </div>
         <div className="field">
           <label className="field-label">Indicador + número (M) <span className="required">*</span></label>
