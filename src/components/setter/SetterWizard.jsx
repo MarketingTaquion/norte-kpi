@@ -204,7 +204,6 @@ export default function SetterWizard({ form, onComplete, loading }) {
                 <select
                   value={pedido.categoria}
                   onChange={(e) => form.updatePedidoCategoria(i, e.target.value)}
-                  disabled={!pedido.texto.trim()}
                 >
                   <option value="">Métrica del pedido {i + 1}…</option>
                   {CATEGORY_OPTIONS.map((c) => (
