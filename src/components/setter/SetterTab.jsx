@@ -1,14 +1,12 @@
 import { useState } from 'react';
 import { useSetterForm } from '../../hooks/useSetterForm.js';
-import { useClaude } from '../../hooks/useClaude.js';
-import { SETTER_SYSTEM_PROMPT } from '../../prompts/setter.js';
-import { buildSetterUserPrompt } from '../../lib/promptBuilders.js';
+import { calculateSetterResult } from '../../lib/calculator/setterCalculator.js';
 import SetterWizard from './SetterWizard.jsx';
 import SetterResult from './SetterResult.jsx';
 
-// Adapta el shape del hook de formulario al shape que espera buildSetterUserPrompt
-// (el mismo que recibe /api/kpi-estimate en el body) — un solo lugar construye
-// el texto del prompt, lo use el wizard o una herramienta externa.
+// Mismo shape que espera /api/kpi-estimate en el body — un solo lugar
+// (src/lib/calculator/) calcula el resultado, lo use el wizard o una
+// herramienta externa vía la API pública.
 function formToFields(form) {
   return {
     cliente: form.clients.find((c) => c.value === form.clientValue)?.label,
@@ -26,23 +24,31 @@ function formToFields(form) {
 
 export default function SetterTab() {
   const form = useSetterForm();
-  const { data, loading, error, call, reset } = useClaude();
+  const [data, setData] = useState(null);
+  const [error, setError] = useState(null);
   const [phase, setPhase] = useState('wizard'); // 'wizard' | 'result'
 
-  const handleComplete = async () => {
+  const handleComplete = () => {
+    try {
+      const result = calculateSetterResult(formToFields(form));
+      setData(result);
+      setError(null);
+    } catch (err) {
+      setError(err.message || 'No se pudo calcular la estimación con los datos ingresados.');
+      setData(null);
+    }
     setPhase('result');
-    const userPrompt = buildSetterUserPrompt(formToFields(form));
-    await call(SETTER_SYSTEM_PROMPT, userPrompt, 8000);
   };
 
   const handleNewEstimate = () => {
-    reset();
+    setData(null);
+    setError(null);
     form.resetForm();
     setPhase('wizard');
   };
 
   if (phase === 'wizard') {
-    return <SetterWizard form={form} onComplete={handleComplete} loading={loading} />;
+    return <SetterWizard form={form} onComplete={handleComplete} loading={false} />;
   }
 
   return (
@@ -53,7 +59,7 @@ export default function SetterTab() {
           + Nueva estimación
         </button>
       </div>
-      <SetterResult data={data} loading={loading} error={error} moneda={form.moneda} />
+      <SetterResult data={data} loading={false} error={error} moneda={form.moneda} />
     </div>
   );
 }

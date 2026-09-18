@@ -1,49 +1,69 @@
-# Actualizar benchmarks y reglas de negocio de los prompts
+# Actualizar benchmarks y reglas de negocio de la calculadora
 
 Los benchmarks de mercado (CTR, CPC, CPM, CPL, ROAS, etc.) y las reglas de
-negocio del Seteador y el Evaluador **no están en el código de UI**: viven como
-texto dentro de los system prompts, en
-[`src/prompts/setter.js`](../../src/prompts/setter.js) y
-[`src/prompts/evaluator.js`](../../src/prompts/evaluator.js). Actualizarlos no
-requiere tocar ningún componente de React.
+clasificación viven como datos estructurados en
+[`src/lib/calculator/benchmarks.js`](../../src/lib/calculator/benchmarks.js) y
+[`src/lib/calculator/kpiCatalog.js`](../../src/lib/calculator/kpiCatalog.js).
+Actualizarlos no requiere tocar ningún componente de React — el wizard, el
+Evaluador y la API pública leen de ahí automáticamente.
 
 ## Actualizar un benchmark (ej. rango de CPC de Meta Ads)
 
-1. Abrí `src/prompts/setter.js` y buscá la sección `# BENCHMARKS`.
-2. Editá la línea correspondiente, manteniendo el mismo formato compacto
-   (`Canal: rango — condición`) para que la IA la lea igual de bien:
+Abrí `benchmarks.js` y editá el objeto correspondiente en `BENCHMARKS`:
 
-   ```js
-   'CPC Meta Ads: $150-800 ARS (B2C masivo), $400-1500 ARS (B2B/nicho)',
-   ```
+```js
+cpc_meta: { min: 150, max: 800, unit: 'moneda', label: 'CPC Meta Ads (B2C)' },
+```
 
-3. Repetí el mismo cambio en `src/prompts/evaluator.js` si el benchmark
-   también se usa ahí — **los dos prompts mantienen listas de benchmarks
-   separadas y deben quedar sincronizadas a mano**, no hay una fuente única
-   compartida hoy.
-4. Redeployá (push a `master`) — no hace falta ningún otro paso, el prompt se
-   envía tal cual en cada llamada.
+Ese mismo objeto lo usan tanto el Seteador (para proyectar) como el
+Evaluador (para chequear el criterio A) — no hay una copia separada por
+flujo, así que un solo cambio alcanza. Ver
+[reference: calculadora](../reference/calculator.md) para la lista completa
+de keys y quién las usa.
 
-## Agregar una regla de negocio nueva
+## Agregar o ajustar una categoría de KPI
 
-Las reglas viven como bullets de texto plano bajo secciones como
-`# REGLAS DE GENERACIÓN` (setter) o `# ERRORES A DETECTAR` (evaluator). Para
-agregar una:
+En `kpiCatalog.js`, cada entrada de `CATEGORIES` define las keywords que
+disparan esa categoría, el SOP, la fórmula y a qué benchmark apunta:
 
-1. Sumá el bullet en el array de strings que arma el prompt (recordá: es un
-   array unido con `.join('\n')`, **nunca uses template literals con
-   backticks acá** — es una convención del proyecto para evitar problemas de
-   escaping).
-2. Si la regla cambia también el JSON que se espera de vuelta, actualizá el
-   `# JSON SCHEMA DE SALIDA` al final del mismo archivo — ver
-   [reference: schema de salida](../reference/prompts-output-schema.md) para
-   el contrato completo.
+```js
+{
+  key: 'leads',
+  keywords: ['lead', 'leads', 'contacto', 'contactos', 'formulario', 'consulta', 'consultas'],
+  sop: 'SOP Ignite',
+  kpi_tecnico: 'CPL (Costo por Lead) y volumen de leads',
+  formula: 'CPL = Inversión / Leads',
+  benchmarkKey: 'cpl_b2c',
+  unidad: 'cantidad',
+  modo: 'costo_por_unidad',
+},
+```
+
+Para agregar una keyword nueva (ej. que "clientes potenciales" también
+dispare la categoría `leads`), sumala al array `keywords` de esa entrada.
+**El orden de `CATEGORIES` importa**: se evalúa de arriba a abajo y gana la
+primera que matchea — si agregás una categoría nueva con keywords que se
+superponen con una existente, ubicala antes o después según cuál querés que
+gane.
+
+Para agregar una categoría completamente nueva, sumá un objeto nuevo al
+array con el mismo shape, y asegurate de que el benchmark que referencia
+(`benchmarkKey`) exista en `BENCHMARKS`.
+
+## Ajustar el `modo` de proyección
+
+Si una categoría nueva no encaja en ninguno de los `modo` existentes
+(`roas`, `costo_por_unidad`, `alcance`, `porcentaje`, `referencial`, `hito`),
+hay que agregar un caso nuevo al `switch` de `proyectarKpi()` en
+[`setterCalculator.js`](../../src/lib/calculator/setterCalculator.js) — ver
+[reference: calculadora](../reference/calculator.md#modo-de-proyección--cómo-se-usa-cada-benchmark)
+para lo que hace cada uno de los existentes antes de agregar uno nuevo.
 
 ## Verificar el cambio
 
-No hay tests automatizados sobre el contenido de los prompts. Verificá a mano:
-correlo local (ver [Netlify Dev](run-locally-with-netlify-dev.md)), generá una
-estimación o auditoría que dispare la regla nueva, y confirmá que la respuesta
-la refleja. Si la IA empieza a devolver JSON que no matchea el schema, el
-`ErrorBox` te va a mostrar el raw de la respuesta para debuggear — ver
-[`src/utils/json.js`](../../src/utils/json.js).
+No hay tests automatizados sobre la calculadora todavía. Verificá a mano:
+`npm run dev`, generá una estimación o auditoría que dispare la categoría o
+el benchmark que tocaste, y confirmá que el resultado lo refleja. Si algo
+rompe el cálculo (ej. una división por cero por un benchmark mal armado), el
+`ErrorBox` te muestra el mensaje de la excepción — ver
+[reference: schema de salida](../reference/output-schema.md).

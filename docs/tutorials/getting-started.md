@@ -2,7 +2,9 @@
 
 Este tutorial te lleva de cero a tener el Seteador de KPIs corriendo en tu
 máquina y generando una estimación real. No hace falta que sepas nada del
-proyecto de antemano.
+proyecto de antemano, y **no necesitás ninguna API key** — los resultados
+los calcula una calculadora interna determinística
+([explanation](../explanation/calculation-engine.md)), no un modelo de IA.
 
 ## 1. Cloná el repo e instalá dependencias
 
@@ -12,48 +14,21 @@ cd norte-kpi
 npm install
 ```
 
-## 2. Conseguí una API key de Anthropic
-
-Necesitás una API key válida de Anthropic (`sk-ant-...`) para que la IA
-responda. Si no tenés una, pedísela a quien administre la cuenta de Anthropic
-del equipo — no se comparte por chat ni se commitea a este repo.
-
-## 3. Creá tu archivo de variables de entorno
-
-En la raíz del proyecto:
+## 2. Levantá el proyecto
 
 ```bash
-cp .env.example .env.local
+npm run dev
 ```
 
-Abrí `.env.local` y reemplazá el valor de ejemplo por tu key real:
+Esto abre el proyecto en `http://localhost:5173` (Vite elige el próximo
+puerto libre si ese está ocupado). No hace falta Netlify CLI ni Vercel CLI
+para esto — el wizard y el Evaluador corren enteramente en el browser.
 
-```
-ANTHROPIC_API_KEY=sk-ant-tu-key-real-aca
-```
+## 3. Generá tu primera estimación
 
-`.env.local` está en `.gitignore` — nunca se sube al repo.
-
-## 4. Levantá el proyecto con Netlify Dev
-
-Este proyecto tiene frontend (React) y backend (una Netlify Function) — para
-que ambos corran juntos y la function pueda leer tu `.env.local`, usá Netlify
-CLI en vez de `npm run dev` (el detalle de por qué está en
-[la guía de Netlify Dev](../how-to/run-locally-with-netlify-dev.md); acá van
-solo los comandos mínimos para completar el tutorial):
-
-```bash
-npm install -g netlify-cli   # si no la tenés instalada
-netlify dev
-```
-
-Esto abre el proyecto en `http://localhost:8888`.
-
-## 5. Generá tu primera estimación
-
-1. Entrá a `http://localhost:8888`. Vas a ver la tab **01 · Seteador de KPIs**
+1. Entrá a la URL que imprimió `npm run dev`. Vas a ver la tab **01 · Seteador de KPIs**
    con el wizard en el Paso 1.
-2. **Paso 1 — Cliente**: elegí "Cliente genérico" (o cualquiera de los demos) y
+2. **Paso 1 — Cliente**: elegí "Demo Retail" (o cualquiera de los demos) y
    tocá **Continuar**.
 3. **Pasos 2 a 5** (Etapa, Período, Presupuesto, Plataformas): son opcionales,
    podés dejarlos vacíos y seguir tocando **Continuar**. Si querés ver el Tax
@@ -66,11 +41,12 @@ Esto abre el proyecto en `http://localhost:8888`.
 
 ## Resultado esperado
 
-La pantalla cambia a la vista de resultado con: el North Star Metric elegido
-(o inferido), la matriz de KPIs SMART, el Tax Check (si cargaste presupuesto),
-el pacing en 4 bloques y los próximos pasos sugeridos. Si en cambio ves un
-`ErrorBox`, revisá que tu `ANTHROPIC_API_KEY` en `.env.local` sea válida y que
-estés corriendo `netlify dev` (no `npm run dev` a secas).
+La pantalla cambia a la vista de resultado, calculada al instante: el North
+Star Metric elegido (o inferido de los pedidos), la matriz de KPIs SMART, el
+Tax Check (si cargaste presupuesto), el pacing en 4 bloques y los próximos
+pasos sugeridos. Con el ejemplo de arriba y $1.000.000 de presupuesto, el KPI
+técnico debería ser "CPL (Costo por Lead) y volumen de leads", con una
+proyección entre ~433 y ~2167 leads.
 
 Para volver a empezar, tocá **+ Nueva estimación** arriba a la derecha del
 resultado.
@@ -79,5 +55,10 @@ resultado.
 
 - Para entender qué hace la tab **02 · Evaluador de KPIs**, probala directo:
   no es un wizard, es un formulario de una sola pantalla.
-- Para deployar esto a Netlify en vez de correrlo local, ver
-  [Deployar a Netlify](../how-to/deploy-to-netlify.md).
+- Para entender cómo se calcula cada número (nada de esto es magia ni IA):
+  [explanation: motor de cálculo](../explanation/calculation-engine.md).
+- Para deployar esto a Netlify o Vercel:
+  [how-to: deploy a Vercel](../how-to/deploy-to-vercel.md).
+- Si además querés que otra herramienta (n8n, un CRM) llame a Norte-kpi por
+  API, esa parte sí necesita una variable de entorno (`NORTE_API_KEY`) — ver
+  [reference: API pública](../reference/api.md).

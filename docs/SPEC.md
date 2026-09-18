@@ -37,14 +37,15 @@ system y todo el detalle técnico.
 | Persistencia de estimaciones por cliente | Alta | hoy no persiste nada — cada estimación se pierde al refrescar |
 | Export a PDF de la matriz de KPIs | Alta | para adjuntar a la propuesta comercial |
 | Wizard también para el Evaluador | Baja | descartado en v1 — es una auditoría puntual, no progresiva (ver [explanation](explanation/product-decisions.md)) |
-| Autenticación por rol (Estratega / Líder) | Media | hoy el acceso es único vía Basic Auth / acceso de team de Netlify |
+| Autenticación por rol (Estratega / Líder) | Media | hoy el acceso es único vía Basic Auth / acceso de team |
 | Histórico real de CPL/CPA/ROAS por cliente | Alta | mejoraría la precisión de la proyección más que agregar más benchmarks genéricos |
+| Benchmarks B2B vs B2C automáticos | Media | hoy la calculadora usa siempre el rango B2C por default — ver [reference: calculadora](reference/calculator.md) |
 
 ## Checklist de lanzamiento
 
-- [ ] `ANTHROPIC_API_KEY` y `NORTE_API_KEY` cargadas en Vercel (Production + Preview) — ver [how-to: deploy a Vercel](how-to/deploy-to-vercel.md)
+- [ ] `NORTE_API_KEY` cargada en Vercel (Production + Preview) si vas a usar la API pública — ver [how-to: deploy a Vercel](how-to/deploy-to-vercel.md). El wizard y el Evaluador no necesitan ninguna variable.
 - [ ] `.env.local` nunca commiteado (verificar `.gitignore`)
-- [ ] `netlify dev` local: wizard completo genera JSON válido, Evaluador devuelve veredicto
+- [ ] `npm run dev` local: wizard completo genera resultado, Evaluador devuelve veredicto — sin ningún `ErrorBox`
 - [ ] Probar sin presupuesto (KPIs referenciales, sin Tax Check) y con presupuesto (Tax Check correcto)
 - [ ] Probar los 4 veredictos del Evaluador
 - [ ] Acceso restringido configurado antes de compartir la URL con el equipo

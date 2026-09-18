@@ -1,0 +1,191 @@
+// Calculadora interna del Seteador. Reemplaza la llamada a Claude: mismo
+// schema de salida que documentaba prompts-output-schema.md, pero resuelto
+// 100% en código — sin API key, sin llamada de red, sin depender de que
+// un modelo "adivine" bien. Ver docs/explanation/calculation-engine.md.
+import { STAGES } from '../../data/stages.js';
+import { PLATFORM_GROUPS } from '../../data/platforms.js';
+import { LAPSOS } from '../../data/lapsos.js';
+import { taxCalc } from '../../utils/tax.js';
+import { classifyText, fuenteDeVerdad } from './kpiCatalog.js';
+import { BENCHMARKS, midpoint } from './benchmarks.js';
+
+const ALL_PLATFORMS = PLATFORM_GROUPS.flatMap((g) => g.items);
+const PACING_BLOQUES = ['25%', '50%', '75%', '100%'];
+
+function resolveLabels(list, values) {
+  return (values || []).map((v) => list.find((item) => item.value === v)?.label).filter(Boolean);
+}
+
+function diasDelPeriodo(periodo) {
+  if (!periodo) return 30;
+  if (periodo.lapso) return LAPSOS.find((l) => l.value === periodo.lapso)?.dias || 30;
+  if (periodo.desde && periodo.hasta) {
+    const ms = new Date(periodo.hasta) - new Date(periodo.desde);
+    if (Number.isFinite(ms) && ms > 0) return Math.max(1, Math.round(ms / 86400000));
+  }
+  return 30;
+}
+
+function round(n) {
+  return Math.round(n);
+}
+
+// Calcula la proyección de un KPI según su "modo" — la parte que reemplaza
+// el juicio de la IA: todo lo que tiene fórmula cerrada se resuelve acá,
+// nunca se inventa un número.
+function proyectarKpi(category, neto) {
+  const b = category.benchmarkKey ? BENCHMARKS[category.benchmarkKey] : null;
+
+  if (!neto || neto <= 0) {
+    // Sin presupuesto: se devuelve el rango de benchmark tal cual, referencial.
+    if (!b) return { min: 0, max: 0, meta: 'Hito a validar sin costo asociado.' };
+    return {
+      min: b.min,
+      max: b.max,
+      meta: `Rango referencial de mercado (sin presupuesto declarado): ${b.min}–${b.max}${b.unit === 'moneda' ? '' : b.unit}.`,
+    };
+  }
+
+  switch (category.modo) {
+    case 'roas': {
+      const min = round(neto * b.min);
+      const max = round(neto * b.max);
+      return { min, max, meta: `Ingresos proyectados por publicidad: entre ${min} y ${max} (ROAS ${b.min}x–${b.max}x sobre el neto).` };
+    }
+    case 'costo_por_unidad': {
+      const costoKey = category.costoBenchmarkKey || category.benchmarkKey;
+      const costo = BENCHMARKS[costoKey] || b;
+      const min = round(neto / costo.max);
+      const max = round(neto / costo.min);
+      return { min, max, meta: `Entre ${min} y ${max} unidades estimadas con el neto disponible (costo por unidad ${costo.min}–${costo.max}).` };
+    }
+    case 'alcance': {
+      const impresionesMin = round((neto / b.max) * 1000);
+      const impresionesMax = round((neto / b.min) * 1000);
+      const frecuencia = midpoint('frecuencia') || 3;
+      const min = round(impresionesMin / frecuencia);
+      const max = round(impresionesMax / frecuencia);
+      return { min, max, meta: `Alcance estimado entre ${min} y ${max} personas (CPM ${b.min}–${b.max}, frecuencia ~${frecuencia}x).` };
+    }
+    case 'porcentaje':
+      return { min: b.min, max: b.max, meta: `Se sostiene el benchmark de mercado: ${b.min}%–${b.max}%.` };
+    case 'hito':
+      return { min: 1, max: 1, meta: 'Hito de implementación — se mide como cumplido/no cumplido, no como rango.' };
+    default:
+      return b
+        ? { min: b.min, max: b.max, meta: `Rango referencial de mercado: ${b.min}–${b.max}${b.unit === 'moneda' ? '' : b.unit}.` }
+        : { min: 0, max: 0, meta: 'Sin benchmark aplicable — se sugiere definir manualmente.' };
+  }
+}
+
+function inferirNsm(kpis, nsmDeclarada) {
+  if (nsmDeclarada) {
+    return { metrica: nsmDeclarada, razon: 'Declarada por el equipo comercial — se usa como brújula del resto de la matriz.' };
+  }
+  if (kpis.length === 0) {
+    return { metrica: 'A definir', razon: 'No hay suficientes pedidos para inferir una North Star Metric.' };
+  }
+  const counts = {};
+  kpis.forEach((k) => { counts[k.kpi_tecnico] = (counts[k.kpi_tecnico] || 0) + 1; });
+  const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
+  return {
+    metrica: top,
+    razon: `Inferida del conjunto de pedidos: es el KPI técnico que más se repite (${counts[top]} de ${kpis.length} pedidos).`,
+  };
+}
+
+function armarPacing(kpis, dias) {
+  const referencia = kpis.find((k) => k.proyeccion_max > 0) || kpis[0];
+  const max = referencia ? referencia.proyeccion_max : 0;
+  return PACING_BLOQUES.map((bloque) => {
+    const pct = parseInt(bloque, 10) / 100;
+    const acumulado = round(max * pct);
+    const diaCorte = round(dias * pct);
+    return {
+      bloque,
+      meta_acumulada: max > 0
+        ? `Día ${diaCorte}: ${acumulado} acumulado de ${referencia.kpi_tecnico}`
+        : `Día ${diaCorte} del período — checkpoint de avance`,
+    };
+  });
+}
+
+export function calculateSetterResult(fields) {
+  const {
+    etapas = [], periodo, presupuesto, moneda = 'ARS', plataformas = [], pedidos = [], nsm,
+  } = fields || {};
+
+  const etapaLabels = resolveLabels(STAGES, etapas);
+  const plataformaLabels = resolveLabels(ALL_PLATFORMS, plataformas);
+  const pedidosValidos = (pedidos || []).map((p) => (p || '').trim()).filter(Boolean);
+  const dias = diasDelPeriodo(periodo);
+
+  const taxCheck = taxCalc(presupuesto || 0);
+  const netoTotal = taxCheck.neto;
+  const netoPorPedido = pedidosValidos.length > 0 ? netoTotal / pedidosValidos.length : 0;
+
+  const setupForzado = etapaLabels.some((l) => l.toLowerCase().startsWith('setup'));
+
+  const kpis = pedidosValidos.map((pedido) => {
+    const category = classifyText(pedido);
+    const sop = setupForzado && category.sop !== 'SOP Ignite' ? 'SOP Setup' : category.sop;
+    const { min, max, meta } = proyectarKpi(category, netoPorPedido);
+    return {
+      pedido_original: pedido.length > 95 ? `${pedido.slice(0, 92)}...` : pedido,
+      sop,
+      kpi_tecnico: category.kpi_tecnico,
+      formula: category.formula,
+      fuente_verdad: fuenteDeVerdad(plataformaLabels),
+      meta_realista: meta,
+      proyeccion_min: min,
+      proyeccion_max: max,
+    };
+  });
+
+  const nsmResult = inferirNsm(kpis, nsm);
+  const pacing = armarPacing(kpis, dias);
+
+  const checklist_nsm = [
+    '¿La NSM está conectada directamente a ingresos, retención o costo del negocio?',
+    '¿Tiene una fuente de verdad clara, medible sin ambigüedad?',
+    '¿El equipo puede accionar sobre ella semana a semana, no solo al cierre del período?',
+    presupuesto > 0
+      ? '¿El neto invertible alcanza para el volumen proyectado, según el Tax Check?'
+      : '¿Hay presupuesto para pasar de rangos referenciales a una meta cerrada?',
+  ];
+
+  const proximos_pasos = [
+    plataformaLabels.length > 0
+      ? `Confirmar accesos y tracking en: ${plataformaLabels.join(', ')}.`
+      : 'Definir plataformas activas y accesos necesarios antes de arrancar.',
+    presupuesto > 0
+      ? 'Validar el Tax Check con administración antes de comprometer el presupuesto con el cliente.'
+      : 'Relevar presupuesto disponible para pasar de rangos referenciales a metas cerradas.',
+    'Presentar la matriz de KPIs y el pacing al cliente en la reunión de kickoff.',
+  ];
+
+  const resumenBase = `NSM: ${nsmResult.metrica}. ${kpis.length} KPI(s) seteados${presupuesto > 0 ? `, neto disponible ${taxCheck.neto.toFixed(0)} ${moneda}` : ' sin presupuesto declarado'}.`;
+  const resumen_ejecutivo = resumenBase.length > 200 ? `${resumenBase.slice(0, 197)}...` : resumenBase;
+
+  return {
+    nsm: nsmResult,
+    stats: {
+      kpis_seteados: kpis.length,
+      neto_disponible: round(taxCheck.neto),
+      metas_originales: pedidosValidos.length,
+      metas_ajustadas: kpis.length,
+    },
+    tax_check: {
+      bruto: round(taxCheck.bruto),
+      fee: round(taxCheck.fee),
+      iva: round(taxCheck.iva),
+      percepciones: round(taxCheck.percepciones),
+      neto: round(taxCheck.neto),
+    },
+    kpis,
+    pacing,
+    checklist_nsm,
+    proximos_pasos,
+    resumen_ejecutivo,
+  };
+}

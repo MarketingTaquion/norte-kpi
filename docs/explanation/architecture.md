@@ -1,45 +1,45 @@
-# Arquitectura: por qué un proxy serverless
+# Arquitectura: por qué el cálculo es client-side y la API es opcional
 
-## El problema que resuelve
+## El cambio central: no hay secreto que proteger
 
-Anthropic cobra por uso de API key. Si el frontend llamara directo a
-`api.anthropic.com` con la key embebida en el bundle de JS, cualquier persona
-con las devtools del browser abiertas podría copiarla y usarla por su cuenta
-— no hay forma de ocultar un secreto dentro de código que corre en el
-navegador del usuario, por más que esté minificado.
+La primera versión de este proyecto llamaba a la API de Anthropic desde una
+función serverless, precisamente para que la API key nunca llegara al
+browser — ver el historial en `docs/SPEC.md`. Desde que el cálculo se movió
+a una calculadora determinística ([explanation: motor de
+cálculo](calculation-engine.md)), **ya no hay ningún secreto que proteger en
+el flujo principal**: no se llama a ningún servicio externo, no hay una API
+key de por medio.
 
-## La solución
-
-Una única capa intermedia entre el browser y Anthropic:
+Esto simplifica la arquitectura de raíz:
 
 ```
-[Browser] → React App → fetch("/api/claude")
+[Browser] → React App → src/lib/calculator/ (mismo proceso, sin red)
                               ↓
-           [Serverless Function] claude.js
-                              ↓
-           [Anthropic API] → Claude Sonnet
-                              ↓
-           [JSON response] → React state → UI
+                       Resultado inmediato → React state → UI
 ```
 
-El frontend nunca conoce la API key. Llama siempre a un endpoint de su propio
-dominio (`/api/claude`), que corre server-side (en Vercel o Netlify, según
-cuál esté sirviendo ese deploy — ver más abajo), agrega la key desde una
-variable de entorno (`process.env.ANTHROPIC_API_KEY`, invisible para
-cualquiera que inspeccione el tráfico del browser) y recién ahí llama a
-Anthropic.
+El Seteador y el Evaluador importan `calculateSetterResult` /
+`calculateEvaluatorResult` directamente
+([`SetterTab.jsx`](../../src/components/setter/SetterTab.jsx),
+[`EvaluatorTab.jsx`](../../src/components/evaluator/EvaluatorTab.jsx)) y los
+ejecutan en el mismo proceso del browser. No hay `fetch`, no hay loading
+real, no hay forma de que "no funcione por falta de una API key" — que era
+exactamente el problema que motivó este cambio.
 
-Si alguien abre las devtools de red en el browser, ve llamadas a su propio
-dominio (`norte-kpi.vercel.app/api/claude`), nunca a `api.anthropic.com`
-directamente.
+## Entonces, ¿para qué sigue existiendo una API?
 
-## Por qué serverless y no un backend separado
+`api/kpi-estimate.js` y `api/kpi-evaluate.js` (más sus equivalentes en
+`netlify/functions/`) siguen existiendo, pero por una razón distinta: **para
+que herramientas externas** (n8n, un CRM, un backend propio) puedan invocar
+el mismo cálculo por HTTP, sin tener el código de Norte-kpi corriendo en su
+propio proceso. Es la misma lógica de `src/lib/calculator/`, expuesta como
+endpoint — no un proxy a nada.
 
-El proyecto no tiene usuarios externos ni necesita un backend persistente:
-es una función stateless (recibe un prompt, reenvía, devuelve la respuesta).
-Un backend serverless da eso sin tener que operar un servidor aparte, y se
-deploya junto con el frontend desde el mismo repo — un solo lugar para
-buildear y un solo lugar para versionar.
+`NORTE_API_KEY` sigue siendo necesaria para esos dos endpoints, pero con un
+propósito distinto al de la vieja `ANTHROPIC_API_KEY`: no protege una llamada
+a un tercero, protege **el endpoint en sí** de ser invocado por cualquiera
+que encuentre la URL — sin eso, cualquiera podría pegarle a la API pública y
+consumir cómputo del sitio sin autorización.
 
 ## Por qué dos plataformas de deploy (Vercel + Netlify)
 
@@ -50,19 +50,18 @@ ese consumo se nota, así que un deploy ahí requiere confirmación explícita e
 vez de ser automático (ver [deploy-to-vercel.md](../how-to/deploy-to-vercel.md)
 y [deploy-to-netlify.md](../how-to/deploy-to-netlify.md)).
 
-Esto obliga a que la lógica de negocio (armado de prompts, llamada a
-Anthropic, auth de la API pública) viva en `src/lib/` y `src/prompts/`,
+Esto obliga a que la lógica de negocio (`src/lib/calculator/`) sea
 **independiente de qué runtime la sirve** — `api/*.js` (Vercel) y
 `netlify/functions/*.js` (Netlify) son wrappers finitos alrededor de esa
-lógica compartida, no una reimplementación por plataforma.
+misma lógica, no una reimplementación por plataforma.
 
-## Por qué una sola función y no una por endpoint (por plataforma)
+## Por qué una función por endpoint, no una sola
 
-Seteador y Evaluador usan el mismo contrato (system prompt + messages +
-max_tokens → respuesta de Anthropic) — ver
-[reference: `/api/claude`](../reference/netlify-function.md). No hay lógica
-de negocio distinta entre ambos casos de uso a nivel de la función: la
-diferencia real está en qué prompt le manda cada tab
-([`src/prompts/`](../../src/prompts/)), no en cómo se llama a Anthropic.
-Separar en dos funciones hubiera duplicado el mismo código de proxy sin
-ninguna ganancia.
+A diferencia del proxy viejo (una sola función `claude.js` que servía tanto
+al Seteador como al Evaluador, porque ambos hablaban el mismo protocolo con
+Anthropic), la API pública tiene **dos** endpoints —
+`kpi-estimate`/`kpi-evaluate` — porque acá sí hay lógica de negocio distinta
+entre ambos: distintos campos obligatorios, distinta validación, distinto
+shape de salida (ver [reference: API pública](../reference/api.md)). Fusionar
+ambos en un único endpoint genérico hubiera obligado a un contrato más
+confuso sin ninguna ganancia real.

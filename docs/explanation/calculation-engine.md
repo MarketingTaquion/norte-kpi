@@ -1,84 +1,101 @@
-# Motor de cálculo: qué es determinístico y qué se delega en la IA
+# Motor de cálculo: por qué es 100% determinístico, sin IA
 
-Norte-kpi existe para traducir un pedido coloquial en un número accionable con
-soporte financiero. Esa traducción tiene tres piezas, y cada una vive en un
-nivel de confianza distinto — la decisión de diseño más importante del
-proyecto es **no delegarle a la IA nada que tenga una fórmula cerrada**.
+Norte-kpi existe para traducir un pedido coloquial en un número accionable
+con soporte financiero. La versión original de este proyecto delegaba esa
+traducción en Claude (Anthropic) vía una API — pero eso significaba que la
+herramienta **no funcionaba si no había una API key de Anthropic cargada**, y
+que cada estimación dependía de una llamada de red a un servicio externo que
+Taquion no controla.
 
-## 1. Tax Check — determinístico, sin IA
+Por eso, desde 2026-09-18, todo el cálculo vive en
+[`src/lib/calculator/`](../../src/lib/calculator/) — código puro, sin
+llamadas de red, sin API key, sin modelo de lenguaje. El wizard y el
+Evaluador calculan el resultado **en el momento, en el browser**, apenas el
+usuario toca "Generar estimación" o "Auditar KPI".
 
-Convierte presupuesto bruto en neto invertible con una fórmula fija:
+## Las tres piezas del motor
+
+### 1. Clasificación por keywords — `kpiCatalog.js`
+
+Cada pedido en lenguaje coloquial ("quiero más leads", "necesito bajar el
+CPA") se compara contra una lista de categorías
+([`CATEGORIES`](../../src/lib/calculator/kpiCatalog.js)), cada una con sus
+propias palabras clave (`leads`, `contacto`, `formulario` → categoría
+`leads`; `alcance`, `marca`, `posicionamiento` → categoría `alcance`; etc.).
+Gana la primera categoría cuyas keywords aparecen en el texto — sin acentos
+ni mayúsculas, gracias a [`text.js`](../../src/lib/calculator/text.js). Si
+nada matchea, cae en la categoría genérica `conversion`.
+
+Cada categoría ya trae consigo el SOP que le corresponde (Ignite / Comunidad
+/ Setup), la fórmula técnica exacta y a qué benchmark de mercado se compara —
+esto reemplaza lo que antes eran las "REGLAS DE ROUTING" del prompt.
+
+### 2. Benchmarks fijos — `benchmarks.js`
+
+Los mismos rangos de mercado argentino 2025-2026 que antes vivían como texto
+suelto dentro del prompt (CTR, CPC, CPM, CPL, ROAS, engagement, LTV/CAC) son
+ahora datos estructurados en
+[`BENCHMARKS`](../../src/lib/calculator/benchmarks.js) — un objeto con
+`{ min, max, unit, label }` por métrica. La calculadora los lee directamente,
+nunca los "recuerda" ni los aproxima.
+
+### 3. Proyección — `setterCalculator.js` / `evaluatorCalculator.js`
+
+Con la categoría y los benchmarks en mano, el cálculo de la proyección es
+aritmética simple:
+
+- **Con presupuesto declarado**: se calcula el neto (ver Tax Check abajo) y
+  se divide por el benchmark de costo por unidad de la categoría (ej. CPL) o
+  se multiplica por el benchmark de retorno (ej. ROAS), según corresponda.
+  El rango `proyeccion_min`/`proyeccion_max` sale de aplicar el extremo más
+  caro y el más barato del benchmark.
+- **Sin presupuesto**: se devuelve el rango de benchmark tal cual, marcado
+  como referencial — nunca se inventa una meta cerrada sin plata detrás.
+
+Para el Evaluador, la misma lógica se usa en sentido inverso: a partir del
+número que declaró el equipo (ej. "500 leads") y el benchmark de costo, se
+estima el costo total y se compara contra el neto disponible.
+
+## Tax Check — el único cálculo que nunca cambió
 
 ```
 neto = bruto × (1 − 0.10 − 0.21 − 0.04) = bruto × 0.65
 ```
 
-| Concepto | % |
-|---|---|
-| Fee de gestión | −10% |
-| IVA | −21% |
-| Percepciones | −4% |
-| **Neto invertible** | **65%** |
+Esta fórmula ([`src/utils/tax.js`](../../src/utils/tax.js)) fue siempre
+determinística, incluso en la versión con IA — es la prueba de que la
+filosofía correcta desde el principio era "todo lo que tiene fórmula cerrada
+se resuelve en código, nunca se le pide a un modelo que lo calcule". El resto
+del motor de cálculo simplemente extiende ese mismo principio a todo lo demás
+que antes se delegaba en Claude.
 
-Se calcula en el cliente en tiempo real (paso 4 del wizard, mientras se
-escribe el presupuesto) con
-[`src/utils/tax.js`](../../src/utils/tax.js), y la IA recalcula el mismo
-número en su respuesta para que ambos coincidan — es intencional que esté
-duplicado: si algún día la IA devuelve un neto distinto al que calculó el
-frontend, es una señal de que el prompt se desvió, no de que hay dos fuentes
-de verdad válidas.
+## Auditoría S.M.A.R.T. del Evaluador — reglas, no juicio de un modelo
 
-## 2. Motor de proyección de KPIs — asistido por IA, con reglas duras
+`evaluatorCalculator.js` audita cada criterio con una regla concreta y
+verificable:
 
-El Seteador no calcula la proyección con una fórmula cerrada: la delega en
-Claude, pero **acotada por reglas explícitas** en el system prompt
-([`src/prompts/setter.js`](../../src/prompts/setter.js)), no en texto libre:
+- **S** (Específico): ¿hay un verbo de acción declarado?
+- **M** (Medible): ¿el indicador tiene un número concreto? (regex sobre el
+  texto, ver [`firstNumber`](../../src/lib/calculator/text.js))
+- **A** (Alcanzable): ¿el número pedido es plausible contra el benchmark de
+  la categoría? (ej. ROAS 20x en el primer mes se marca como improbable)
+- **R** (Relevante): ¿hay un segmento declarado, y la métrica no es de
+  vanidad? (keywords como "likes" sin conexión a negocio se detectan y
+  bajan directo a `RECHAZADO_VANIDAD`)
+- **T** (Tiempo): ¿hay un plazo definido (lapso o fechas)?
 
-- *Routing por SOP*: la plataforma elegida determina qué SOP aplica (Ignite /
-  Comunidad / Setup) — esto no es una preferencia estética, cambia qué tipo de
-  meta es válida (performance vs. hito de implementación).
-- *Sin presupuesto declarado* → la IA está obligada a devolver rangos
-  referenciales de benchmark, nunca una meta cerrada, y a marcarlo. Esto evita
-  que el equipo comercial presente al cliente un número que parece preciso
-  pero no tiene sustento financiero.
-- *Benchmarks fijos*: los rangos de mercado (CTR, CPC, CPM, CPL, ROAS,
-  engagement, LTV/CAC) están escritos en el prompt, no generados por la IA —
-  la IA los aplica, no los inventa.
-- *Pacing siempre en 4 bloques* (25/50/75/100%): es una convención del equipo
-  Ignite, no una elección de la IA por request.
+El veredicto final (`APROBADO` / `RECHAZADO_VANIDAD` /
+`RECHAZADO_INVIABILIDAD` / `CONDICIONADO`) sale de un árbol de decisión fijo
+sobre estos cinco checks más la viabilidad financiera — nunca de una
+"impresión" de qué tan bien redactado está el KPI.
 
-**Por qué se delega esto y no se calcula con una fórmula**: no existe una
-fórmula única para "cuántos leads son razonables con este presupuesto en este
-vertical" — depende de industria, estacionalidad, plataforma y del pedido
-específico del cliente en lenguaje natural. Ese es exactamente el tipo de
-juicio de mercado que un LLM puede aportar, siempre que esté acotado por
-benchmarks fijos y un schema de salida cerrado (ver
-[reference: schema de salida](../reference/prompts-output-schema.md)) para que
-el criterio no derive en números inventados.
+## Los límites de este enfoque (y por qué son aceptables)
 
-## 3. Motor de auditoría del Evaluador — reglas de rechazo + juicio de la IA
-
-Combina dos capas:
-
-1. **Patrones de rechazo automático**: 6 errores listados explícitamente en
-   [`src/prompts/evaluator.js`](../../src/prompts/evaluator.js) que la IA está
-   obligada a detectar (ROAS calculado sobre utilidad en vez de ingresos, KPI
-   sin número concreto, sin plazo, de vanidad, meta matemáticamente imposible,
-   o irrelevante para el objetivo declarado). Cada patrón mapea a qué criterio
-   S.M.A.R.T. falla.
-2. **Veredicto financiero determinístico**: una vez que hay presupuesto, el
-   mismo cálculo `neto = bruto × 0.65` se compara contra un costo estimado
-   para la meta declarada → superávit o déficit.
-
-Los cuatro veredictos (`APROBADO`, `RECHAZADO_VANIDAD`,
-`RECHAZADO_INVIABILIDAD`, `CONDICIONADO`) son reglas mutuamente excluyentes,
-no una escala de sentimiento — el `confianza_pct` que devuelve la IA es un
-dato adicional para el lector humano, **nunca** lo que decide el veredicto.
-
-## El principio general
-
-Todo lo que tiene una fórmula cerrada (Tax Check, elección de SOP por
-plataforma, estructura de pacing en 4 bloques) se resuelve en código, para que
-un LLM no pueda "inventar" una cuenta de IVA. Todo lo que requiere criterio de
-mercado se delega en Claude, pero con benchmarks fijos y un schema de salida
-cerrado para que el criterio no derive en alucinación de números.
+Un matching por keywords es más rígido que un modelo de lenguaje: un pedido
+raro o mal escrito puede caer en la categoría genérica `conversion` en vez de
+una más específica. Eso es un trade-off consciente — se prefiere un resultado
+**predecible, verificable y siempre disponible** por sobre uno más "inteligente"
+pero dependiente de un servicio externo, una API key, y potencialmente
+inconsistente entre corridas. Si en el futuro hace falta más precisión, el
+lugar para mejorarla es sumar keywords y categorías a `kpiCatalog.js` — ver
+[how-to: actualizar benchmarks y reglas](../how-to/update-kpi-rules-and-benchmarks.md).

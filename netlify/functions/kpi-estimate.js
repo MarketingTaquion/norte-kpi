@@ -1,7 +1,6 @@
-// API pública: POST /api/kpi-estimate (ver netlify.toml para el redirect).
-// Contrato completo en docs/reference/api.md — pensado para que herramientas
-// externas (n8n, CRM, etc.) generen una estimación de KPIs sin pasar por el
-// wizard del browser. Requiere el header X-Api-Key (NORTE_API_KEY).
+// API pública (Netlify): POST /api/kpi-estimate (ver netlify.toml para el
+// redirect). Calcula la estimación con la calculadora interna determinística
+// — sin llamar a ningún modelo de IA. Documentado en docs/reference/api.md.
 exports.handler = async function (event) {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: JSON.stringify({ error: 'Method Not Allowed' }) };
@@ -33,33 +32,12 @@ exports.handler = async function (event) {
     };
   }
 
-  try {
-    const { buildSetterUserPrompt } = await import('../../src/lib/promptBuilders.js');
-    const { SETTER_SYSTEM_PROMPT } = await import('../../src/prompts/setter.js');
-    const { callClaudeText } = await import('../../src/lib/anthropic.js');
-    const { parseResponse } = await import('../../src/utils/json.js');
-    const { taxCalc } = await import('../../src/utils/tax.js');
+  const { calculateSetterResult } = await import('../../src/lib/calculator/setterCalculator.js');
+  const result = calculateSetterResult(payload);
 
-    const userPrompt = buildSetterUserPrompt(payload);
-    const rawText = await callClaudeText({ system: SETTER_SYSTEM_PROMPT, userPrompt, maxTokens: 8000 });
-    const result = parseResponse(rawText);
-
-    // El Tax Check es determinístico: se recalcula en código y se pisa lo que
-    // haya devuelto la IA, en vez de confiar en su número (ver
-    // docs/explanation/calculation-engine.md).
-    if (payload.presupuesto) {
-      result.tax_check = taxCalc(payload.presupuesto);
-    }
-
-    return {
-      statusCode: 200,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(result),
-    };
-  } catch (err) {
-    return {
-      statusCode: err.statusCode || 502,
-      body: JSON.stringify({ error: err.message, detail: err.detail, raw: err.raw }),
-    };
-  }
+  return {
+    statusCode: 200,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(result),
+  };
 };

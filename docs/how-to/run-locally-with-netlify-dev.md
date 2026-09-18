@@ -1,9 +1,12 @@
-# Correr el proxy de Claude en local con Netlify Dev
+# Probar la API pública en local con Netlify Dev
 
-`npm run dev` (Vite solo) sirve el frontend, pero **no** levanta
-`netlify/functions/claude.js` — el wizard va a completarse hasta "Generar
-estimación" y ahí fallar con un error de red, porque `/.netlify/functions/claude`
-no existe sin el runtime de Netlify.
+`npm run dev` (Vite solo) alcanza para todo el wizard y el Evaluador — no
+necesitás esta guía para el uso normal de Norte-kpi (ver
+[tutorial de inicio](../tutorials/getting-started.md)). Netlify Dev solo hace
+falta si querés probar en local los endpoints de la
+[API pública](../reference/api.md) (`/api/kpi-estimate`,
+`/api/kpi-evaluate`) tal como los llamaría una herramienta externa —
+`npm run dev` no levanta esas functions.
 
 ## Pasos
 
@@ -13,9 +16,11 @@ no existe sin el runtime de Netlify.
    npm install -g netlify-cli
    ```
 
-2. Asegurate de tener `.env.local` con `ANTHROPIC_API_KEY` cargada (ver
-   [tutorial de inicio](../tutorials/getting-started.md) si todavía no lo
-   armaste).
+2. Creá `.env.local` con una `NORTE_API_KEY` de prueba:
+
+   ```bash
+   echo "NORTE_API_KEY=test-key-123" > .env.local
+   ```
 
 3. Corré:
 
@@ -23,27 +28,19 @@ no existe sin el runtime de Netlify.
    netlify dev
    ```
 
-   Esto levanta Vite y la function juntos en `http://localhost:8888`, con
-   `.env.local` inyectada como variables de entorno de la function.
+   Esto levanta Vite y las functions juntas en `http://localhost:8888`, con
+   `.env.local` inyectada como variable de entorno.
 
-4. (Opcional) vinculá el proyecto local al sitio real de Netlify para que
-   `netlify dev` también pueda usar las variables de entorno cargadas en el
-   dashboard en vez de `.env.local`:
-
-   ```bash
-   netlify link
-   ```
-
-## Verificar que la function responde
+## Verificar que la API responde
 
 ```bash
-curl -X POST http://localhost:8888/.netlify/functions/claude \
+curl -X POST http://localhost:8888/api/kpi-estimate \
   -H "Content-Type: application/json" \
-  -d '{"system":"Respondé solo con la palabra OK.","messages":[{"role":"user","content":"hola"}],"max_tokens":10}'
+  -H "X-Api-Key: test-key-123" \
+  -d '{"cliente":"Test","pedidos":["quiero mas leads"]}'
 ```
 
-Una respuesta `200` con un JSON de Anthropic adentro confirma que la
-`ANTHROPIC_API_KEY` está bien cargada y la function puede llegar a
-`api.anthropic.com`. Un `500` con `"ANTHROPIC_API_KEY no está configurada en
-Netlify."` significa que la variable no llegó al proceso — revisá `.env.local`
-o las env vars del sitio si usaste `netlify link`.
+Una respuesta `200` con la matriz de KPIs confirma que todo está andando —
+no hace falta ninguna otra key ni conexión externa, el cálculo es local. Un
+`401` significa que el header `X-Api-Key` no matchea la `NORTE_API_KEY` de
+`.env.local`.

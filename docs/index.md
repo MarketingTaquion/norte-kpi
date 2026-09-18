@@ -18,25 +18,25 @@ probablemente esté en otra categoría de esta misma lista.
 
 ## How-to guides
 
-- [Correr el proxy de Claude en local con Netlify Dev](how-to/run-locally-with-netlify-dev.md)
+- [Probar la API pública en local con Netlify Dev](how-to/run-locally-with-netlify-dev.md)
 - [Deployar a Vercel](how-to/deploy-to-vercel.md) — plataforma principal
 - [Deployar a Netlify](how-to/deploy-to-netlify.md) — secundaria, requiere confirmación
-- [Actualizar benchmarks y reglas de negocio de los prompts](how-to/update-kpi-rules-and-benchmarks.md)
+- [Actualizar benchmarks y reglas de la calculadora](how-to/update-kpi-rules-and-benchmarks.md)
 - [Integrar una herramienta externa (API pública)](how-to/integrate-external-tool.md)
 
 ## Reference
 
 - [Estructura del repositorio](reference/repository-structure.md)
 - [API pública — `/api/kpi-estimate` y `/api/kpi-evaluate`](reference/api.md)
-- [Función proxy interna `claude.js` (Vercel y Netlify)](reference/netlify-function.md)
-- [Schema de salida de los prompts (Seteador / Evaluador)](reference/prompts-output-schema.md)
+- [Calculadora interna — categorías, benchmarks y reglas](reference/calculator.md)
+- [Schema de salida (Seteador / Evaluador)](reference/output-schema.md)
 - [Datos de configuración (clientes, etapas, plataformas, lapsos)](reference/configuration-data.md)
 - [Variables de entorno](reference/environment-variables.md)
 
 ## Explanation
 
-- [Arquitectura: por qué un proxy serverless](explanation/architecture.md)
-- [Motor de cálculo: qué es determinístico y qué se delega en la IA](explanation/calculation-engine.md)
+- [Arquitectura: por qué el cálculo es client-side y la API es opcional](explanation/architecture.md)
+- [Motor de cálculo: por qué es 100% determinístico, sin IA](explanation/calculation-engine.md)
 - [Design system: por qué se usan los tokens reales de Taquion](explanation/design-system.md)
 - [Por qué el Seteador es un wizard y el Evaluador no](explanation/product-decisions.md)
 

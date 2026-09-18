@@ -32,14 +32,15 @@ progreso en **Netlify → norte-kpi → Deploys**.
 3. Elegí el repo, dejá el build command / publish dir que ya vienen de
    `netlify.toml` (no hace falta tocarlos), y confirmá el deploy.
 
-## Cargar la API key
+## Cargar la API key (solo si vas a usar la API pública)
 
-La `ANTHROPIC_API_KEY` **no está en el repo** (por diseño, ver
-[variables de entorno](../reference/environment-variables.md)) y hay que
-cargarla a mano en cada sitio nuevo:
+El wizard y el Evaluador funcionan de una, sin ninguna variable de entorno.
+`NORTE_API_KEY` **no está en el repo** (por diseño, ver
+[variables de entorno](../reference/environment-variables.md)) y solo hace
+falta si vas a integrar la API pública con otra herramienta:
 
 1. **Site → Project configuration → Environment variables → Add a variable**.
-2. Key: `ANTHROPIC_API_KEY`, value: la key real (`sk-ant-...`).
+2. Key: `NORTE_API_KEY`, value: un random largo propio.
 3. Scope: "Same value for all deploy contexts" (o al menos Production +
    Deploy previews).
 4. Guardá y volvé a triggerear un deploy si el sitio ya estaba built antes de
@@ -59,6 +60,5 @@ sin tocar código:
 ## Verificar que quedó bien
 
 Después de un deploy nuevo, entrá a la URL pública del sitio y completá el
-wizard del Seteador hasta "Generar estimación". Si tira `ErrorBox`, revisá
-primero que la `ANTHROPIC_API_KEY` esté cargada (paso anterior) — es la causa
-más común.
+wizard del Seteador hasta "Generar estimación" — debería funcionar de una,
+sin ningún `ErrorBox`, porque no depende de ninguna variable de entorno.

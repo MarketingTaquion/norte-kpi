@@ -12,10 +12,11 @@ usando [`vercel.json`](../../vercel.json) (`npm run build`, publica `dist/`,
 rewrite de SPA que excluye `/api/*`). Mirá el progreso en
 **Vercel → norte-kpi → Deployments**.
 
-Los tres endpoints de `api/*.js` (`claude.js`, `kpi-estimate.js`,
-`kpi-evaluate.js`) se despliegan automáticamente como Vercel Functions — no
-hace falta ningún rewrite adicional para que `/api/kpi-estimate` funcione, a
-diferencia de Netlify.
+Los dos endpoints de `api/*.js` (`kpi-estimate.js`, `kpi-evaluate.js`) se
+despliegan automáticamente como Vercel Functions — no hace falta ningún
+rewrite adicional para que `/api/kpi-estimate` funcione, a diferencia de
+Netlify. El wizard y el Evaluador no necesitan ninguna function: calculan
+todo en el browser (ver [explanation: arquitectura](../explanation/architecture.md)).
 
 ## Conectar el proyecto desde cero
 
@@ -31,24 +32,25 @@ diferencia de Netlify.
    `vercel.json` para el build. No hace falta tocar nada del formulario de
    import salvo el nombre del proyecto.
 
-## Cargar las API keys
+## Cargar la API key (solo si vas a usar la API pública)
 
-Igual que en Netlify, `ANTHROPIC_API_KEY` y `NORTE_API_KEY` **no están en el
-repo** — hay que cargarlas a mano en el proyecto de Vercel:
+El wizard y el Evaluador funcionan de una, sin ninguna variable de entorno.
+`NORTE_API_KEY` **no está en el repo** — solo hace falta si vas a integrar
+la [API pública](../reference/api.md) con otra herramienta:
 
 1. **Project → Settings → Environment Variables**.
-2. Agregá `ANTHROPIC_API_KEY` (la de Anthropic) y `NORTE_API_KEY` (la propia
-   de Norte-kpi, ver [reference: API pública](../reference/api.md)).
+2. Agregá `NORTE_API_KEY` (ver [reference: API pública](../reference/api.md)).
 3. Marcá los entornos que correspondan (Production, Preview, Development).
-4. Si el proyecto ya tenía un deploy antes de cargar las variables, hace
-   falta un **Redeploy** (Deployments → ⋯ → Redeploy) para que la función las
+4. Si el proyecto ya tenía un deploy antes de cargar la variable, hace
+   falta un **Redeploy** (Deployments → ⋯ → Redeploy) para que la función la
    vea — las env vars no se inyectan en un deploy ya construido.
 
 ## Verificar que quedó bien
 
 Después de un deploy, entrá a la URL del sitio y completá el wizard del
-Seteador hasta "Generar estimación". Si tira `ErrorBox`, revisá primero que
-`ANTHROPIC_API_KEY` esté cargada. Para la API pública, un `curl` rápido:
+Seteador hasta "Generar estimación" — debería funcionar de una, sin ningún
+`ErrorBox`, porque no depende de ninguna variable de entorno. Para la API
+pública, un `curl` rápido:
 
 ```bash
 curl -X POST https://<tu-proyecto>.vercel.app/api/kpi-estimate \

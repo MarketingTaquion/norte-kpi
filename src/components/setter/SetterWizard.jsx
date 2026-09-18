@@ -157,7 +157,7 @@ export default function SetterWizard({ form, onComplete, loading }) {
         {STEPS[step].key === 'plataformas' && (
           <div>
             <p className="wizard-step-hint" style={{ marginTop: 0, marginBottom: 14 }}>
-              Opcional — determina qué SOP aplica la IA para cada pedido.
+              Opcional — determina qué SOP aplica la calculadora para cada pedido.
             </p>
             {PLATFORM_GROUPS.map((g) => (
               <div key={g.group} className="chip-group">
@@ -200,7 +200,7 @@ export default function SetterWizard({ form, onComplete, loading }) {
               <label className="field-label">North Star Metric (opcional)</label>
               <input
                 type="text"
-                placeholder="Si no se completa, la IA la infiere del conjunto de pedidos"
+                placeholder="Si no se completa, se infiere del conjunto de pedidos"
                 value={form.nsm}
                 onChange={(e) => form.setNsm(e.target.value)}
               />
@@ -233,7 +233,7 @@ export default function SetterWizard({ form, onComplete, loading }) {
               </div>
               <div className="review-row">
                 <span className="r-label">North Star Metric</span>
-                <span className="r-value">{form.nsm || 'A inferir por la IA'}</span>
+                <span className="r-value">{form.nsm || 'A inferir automáticamente'}</span>
               </div>
             </div>
             <div className="section-heading">Pedidos a traducir</div>

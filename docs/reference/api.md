@@ -2,10 +2,9 @@
 
 Dos endpoints para que herramientas externas (n8n, un CRM, un backend propio)
 generen una estimación o auditen un KPI sin pasar por el wizard del browser.
-Son públicos en el sentido de "alcanzables desde internet", pero requieren
-autenticación — no son lo mismo que la función proxy interna del wizard (ver
-[reference: `/api/claude`](netlify-function.md), que no requiere key porque
-solo la llama el propio frontend).
+Corren la misma [calculadora determinística](calculator.md) que usa el
+browser — nada de IA, nada de red hacia un tercero. Son públicos en el
+sentido de "alcanzables desde internet", por eso requieren autenticación.
 
 Cada endpoint tiene una implementación por plataforma de deploy, con
 **contrato idéntico** (mismo request, misma response, mismos códigos de
@@ -16,10 +15,10 @@ error) — la diferencia es solo dónde vive el código:
 | Vercel (principal) | [`api/kpi-estimate.js`](../../api/kpi-estimate.js) | [`api/kpi-evaluate.js`](../../api/kpi-evaluate.js) |
 | Netlify (secundaria) | [`netlify/functions/kpi-estimate.js`](../../netlify/functions/kpi-estimate.js) | [`netlify/functions/kpi-evaluate.js`](../../netlify/functions/kpi-evaluate.js) |
 
-Ambas comparten la misma lógica de negocio desde `src/lib/` (armado de
-prompts, llamada a Anthropic, auth) — nada de esto está duplicado entre
-plataformas, solo el archivo de entrada que Vercel/Netlify esperan en su
-propia convención.
+Ambas comparten la misma lógica de negocio desde
+[`src/lib/calculator/`](../../src/lib/calculator/) — nada de esto está
+duplicado entre plataformas, solo el archivo de entrada que Vercel/Netlify
+esperan en su propia convención.
 
 ## Auth
 
@@ -29,11 +28,14 @@ Todas las requests necesitan el header:
 X-Api-Key: <NORTE_API_KEY>
 ```
 
-`NORTE_API_KEY` es una key propia de Norte-kpi (no la de Anthropic), cargada
-en las Environment Variables del proyecto en Vercel (o Netlify, si el deploy
-que estás llamando es ese) — ver [deploy-to-vercel.md](../how-to/deploy-to-vercel.md).
-Es una sola key compartida para todas las integraciones en v1 — no hay keys
-por integración todavía (ver `docs/SPEC.md`, roadmap).
+`NORTE_API_KEY` es una key propia de Norte-kpi, cargada en las Environment
+Variables del proyecto en Vercel (o Netlify, si el deploy que estás llamando
+es ese) — ver [deploy-to-vercel.md](../how-to/deploy-to-vercel.md). Protege
+el endpoint de ser invocado por cualquiera que encuentre la URL — no protege
+ninguna llamada a un tercero, porque no hay ninguna (ver
+[explanation: arquitectura](../explanation/architecture.md)). Es una sola key
+compartida para todas las integraciones en v1 — no hay keys por integración
+todavía (ver `docs/SPEC.md`, roadmap).
 
 Sin el header, o con un valor que no matchea: `401`.
 Si `NORTE_API_KEY` no está configurada en el sitio: `500` (la API queda
@@ -45,8 +47,8 @@ Genera una estimación de KPIs — el mismo resultado que produce el wizard del
 Seteador al llegar al paso 7, sin la interacción paso a paso.
 
 Función real: [`api/kpi-estimate.js`](../../api/kpi-estimate.js) (Vercel) / [`netlify/functions/kpi-estimate.js`](../../netlify/functions/kpi-estimate.js) (Netlify).
-Prompt: [`SETTER_SYSTEM_PROMPT`](../../src/prompts/setter.js) — ver
-[schema de salida completo](prompts-output-schema.md#seteador--setter_system_prompt).
+Calcula con [`calculateSetterResult()`](../../src/lib/calculator/setterCalculator.js) — ver
+[schema de salida completo](output-schema.md#seteador--calculatesetterresult).
 
 ### Request
 
@@ -62,10 +64,10 @@ X-Api-Key: <NORTE_API_KEY>
 | `pedidos` | `string[]` | **Sí** (mín. 1 no vacío) | Pedidos en lenguaje coloquial |
 | `etapas` | `string[]` | No | Values de [`STAGES`](configuration-data.md#srcdatastagesjs--stages) (ej. `"comunidad-captacion"`) |
 | `periodo` | `{ lapso: string }` \| `{ desde: string, hasta: string }` | No | `lapso` es un value de [`LAPSOS`](configuration-data.md#srcdatalapsosjs--lapsos) (ej. `"mes-1"`); `desde`/`hasta` son fechas `YYYY-MM-DD` |
-| `presupuesto` | `number` | No | Bruto. Si se omite, la IA genera rangos referenciales sin Tax Check |
+| `presupuesto` | `number` | No | Bruto. Si se omite, se devuelven rangos de benchmark referenciales sin Tax Check |
 | `moneda` | `"ARS"` \| `"USD"` | No | Default `"ARS"` |
 | `plataformas` | `string[]` | No | Values de [`PLATFORM_GROUPS`](configuration-data.md#srcdataplatformsjs--platform_groups) (ej. `"meta-ads"`) |
-| `nsm` | `string` | No | North Star Metric declarada; si se omite, la IA la infiere |
+| `nsm` | `string` | No | North Star Metric declarada; si se omite, se infiere del KPI técnico más repetido entre los pedidos |
 
 Ejemplo:
 
@@ -84,10 +86,7 @@ Ejemplo:
 ### Response `200`
 
 El mismo JSON que consume `SetterResult.jsx` — ver
-[schema completo](prompts-output-schema.md#seteador--setter_system_prompt).
-`tax_check` viene **recalculado en código** a partir de `presupuesto` (no es
-el número crudo que devolvió la IA — ver
-[explanation: motor de cálculo](../explanation/calculation-engine.md)).
+[schema completo](output-schema.md#seteador--calculatesetterresult).
 
 ### Errores
 
@@ -97,7 +96,7 @@ el número crudo que devolvió la IA — ver
 | `401` / `500` | Ver sección Auth |
 | `400` | Body no es JSON válido |
 | `422` | Falta `cliente` o `pedidos` (o `pedidos` está vacío) |
-| `502` | Falló la llamada a Anthropic, o la IA no devolvió JSON parseable (`raw` trae el texto crudo para debug) |
+| `500` | Excepción no esperada del cálculo (ej. un `periodo` malformado) — no debería pasar con input válido |
 
 ## `POST /api/kpi-evaluate`
 
@@ -105,8 +104,8 @@ Audita un KPI ya redactado — el mismo resultado que produce el formulario del
 Evaluador.
 
 Función real: [`api/kpi-evaluate.js`](../../api/kpi-evaluate.js) (Vercel) / [`netlify/functions/kpi-evaluate.js`](../../netlify/functions/kpi-evaluate.js) (Netlify).
-Prompt: [`EVALUATOR_SYSTEM_PROMPT`](../../src/prompts/evaluator.js) — ver
-[schema de salida completo](prompts-output-schema.md#evaluador--evaluator_system_prompt).
+Calcula con [`calculateEvaluatorResult()`](../../src/lib/calculator/evaluatorCalculator.js) — ver
+[schema de salida completo](output-schema.md#evaluador--calculateevaluatorresult).
 
 ### Request
 
@@ -146,10 +145,7 @@ Ejemplo:
 ### Response `200`
 
 El mismo JSON que consume `EvaluatorResult.jsx` — ver
-[schema completo](prompts-output-schema.md#evaluador--evaluator_system_prompt).
-Si se envió `presupuesto`, `viabilidad.presupuesto_bruto`,
-`viabilidad.presupuesto_neto` y `viabilidad.superavit_deficit` vienen
-recalculados en código, no son el número crudo de la IA.
+[schema completo](output-schema.md#evaluador--calculateevaluatorresult).
 
 ### Errores
 

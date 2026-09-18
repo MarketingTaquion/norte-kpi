@@ -18,10 +18,13 @@ roadmap en [`docs/SPEC.md`](../SPEC.md)).
 ## `src/data/stages.js` — `STAGES`
 
 7 etapas de proyecto, cada una con `{ value, label, description, group }`.
-`group` es `"Setup"` (4 etapas) o `"Comunidad"` (3 etapas) — se usa solo para
-agrupar visualmente, el routing real por SOP lo decide la plataforma elegida,
-no la etapa (ver [reference: schema de salida](prompts-output-schema.md),
-campo `sop`).
+`group` es `"Setup"` (4 etapas) o `"Comunidad"` (3 etapas) — se usa para
+agrupar visualmente, y además **fuerza el SOP a "SOP Setup"** en la
+calculadora si hay alguna etapa "Setup · ..." seleccionada (ver
+`setupForzado` en
+[`setterCalculator.js`](../../src/lib/calculator/setterCalculator.js)). El
+routing por defecto, sin esa etapa, lo decide la categoría detectada en el
+texto del pedido — ver [reference: calculadora](calculator.md).
 
 ## `src/data/platforms.js` — `PLATFORM_GROUPS`
 
@@ -33,8 +36,12 @@ campo `sop`).
 | Orgánico / Social | SOP Comunidad | 6 |
 | Otros | SOP Setup | 3 |
 
-El campo `sop` de cada grupo es documental (para quien lee el código); el
-routing real de SOP lo hace la IA dentro del prompt, no el frontend.
+El campo `sop` de cada grupo es **documental** (para quien lee el código):
+la calculadora no lo lee para decidir el SOP de un KPI — eso lo decide la
+categoría del pedido (`kpiCatalog.js`) y la etapa Setup forzada, no qué
+plataforma esté tildada. Las plataformas seleccionadas sí se usan para otra
+cosa: elegir la `fuente_verdad` de cada KPI (`fuenteDeVerdad()` en
+`kpiCatalog.js`).
 
 ## `src/data/lapsos.js` — `LAPSOS`
 
@@ -53,6 +60,7 @@ routing real de SOP lo hace la IA dentro del prompt, no el frontend.
 | `q4` | Último trimestre | 90 |
 | `anio-completo` | Año completo | 365 |
 
-El campo `dias` no se usa hoy para ningún cálculo automático en el frontend
-(el pacing en 4 bloques lo calcula la IA a partir de la etiqueta) — queda
-disponible para cuando se implemente pacing calculado en cliente.
+El campo `dias` **sí se usa** para calcular el pacing: `diasDelPeriodo()` en
+`setterCalculator.js`/`evaluatorCalculator.js` lo lee para ubicar cada
+bloque de 25/50/75/100% en un día concreto del período (ej. "Día 8" para el
+25% de un `mes-1`).

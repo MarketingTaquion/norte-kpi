@@ -5,17 +5,17 @@ Esta guía muestra cómo conectarlos desde afuera.
 
 ## 1. Conseguí la API key
 
-Pedile a quien administra Netlify el valor de `NORTE_API_KEY` (Project
-configuration → Environment variables del sitio `norte-kpi`). No es la misma
-key que `ANTHROPIC_API_KEY` — no la vas a poder deducir ni reusar de otra
-integración.
+Pedile a quien administra el proyecto en Vercel (o Netlify, si estás
+integrando contra ese deploy) el valor de `NORTE_API_KEY` (Project →
+Settings → Environment Variables). Es una key propia de Norte-kpi — no
+depende de ningún otro servicio ni la vas a poder deducir.
 
 ## 2. Probalo con `curl` antes de integrarlo
 
 Generar una estimación:
 
 ```bash
-curl -X POST https://norte-kpi.netlify.app/api/kpi-estimate \
+curl -X POST https://norte-kpi.vercel.app/api/kpi-estimate \
   -H "Content-Type: application/json" \
   -H "X-Api-Key: TU_NORTE_API_KEY" \
   -d '{
@@ -29,7 +29,7 @@ curl -X POST https://norte-kpi.netlify.app/api/kpi-estimate \
 Auditar un KPI:
 
 ```bash
-curl -X POST https://norte-kpi.netlify.app/api/kpi-evaluate \
+curl -X POST https://norte-kpi.vercel.app/api/kpi-evaluate \
   -H "Content-Type: application/json" \
   -H "X-Api-Key: TU_NORTE_API_KEY" \
   -d '{
@@ -46,7 +46,7 @@ obligatorio falta.
 ## 3. Integrar desde n8n
 
 1. Nodo **HTTP Request**.
-2. Method: `POST`. URL: `https://norte-kpi.netlify.app/api/kpi-estimate` (o
+2. Method: `POST`. URL: `https://norte-kpi.vercel.app/api/kpi-estimate` (o
    `kpi-evaluate`).
 3. **Headers**: agregá `X-Api-Key` con el valor de la key (guardala como
    credencial de n8n, no hardcodeada en el nodo, para poder rotarla sin tocar
@@ -54,19 +54,18 @@ obligatorio falta.
 4. **Body**: `JSON`, con los campos de
    [la tabla de request](../reference/api.md#post-apikpi-estimate) — podés
    mapear campos de un nodo anterior (ej. un formulario, un CRM) a este JSON.
-5. El nodo siguiente recibe directamente el JSON parseado de la respuesta
-   (matriz de KPIs, o veredicto) — no hace falta ningún parseo adicional, a
-   diferencia de la respuesta cruda de Anthropic.
+5. El nodo siguiente recibe directamente el JSON de la respuesta (matriz de
+   KPIs, o veredicto) — es el mismo cálculo determinístico del browser, no
+   depende de ningún servicio externo, así que no hay que lidiar con
+   timeouts ni reintentos de un modelo de IA.
 
 ## 4. Manejo de errores en el workflow
 
 Los códigos de error son estables (ver
 [reference: errores](../reference/api.md)) — armá el workflow para
-ramificar al menos en estos tres casos:
+ramificar al menos en estos dos casos:
 
 - `401` / `500` → problema de configuración (key incorrecta o no cargada), no
   reintentar automáticamente, avisar a quien administra la integración.
 - `422` → el request que armó el workflow le faltó un campo obligatorio —
   error del lado de quien integra, no de Norte-kpi.
-- `502` → la IA no respondió bien (falla de red o JSON no parseable) — es
-  razonable reintentar una vez antes de escalar.

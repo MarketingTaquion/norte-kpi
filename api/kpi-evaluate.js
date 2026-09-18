@@ -1,14 +1,10 @@
-// API pública (Vercel): POST /api/kpi-evaluate — equivalente Vercel de
-// netlify/functions/kpi-evaluate.js. Mismo contrato, documentado en
-// docs/reference/api.md. Requiere el header X-Api-Key (NORTE_API_KEY).
+// API pública (Vercel): POST /api/kpi-evaluate. Audita el KPI con la
+// calculadora interna determinística — sin llamar a ningún modelo de IA.
+// Documentado en docs/reference/api.md.
 import { checkApiKey } from '../src/lib/apiAuth.js';
-import { buildEvaluatorUserPrompt } from '../src/lib/promptBuilders.js';
-import { EVALUATOR_SYSTEM_PROMPT } from '../src/prompts/evaluator.js';
-import { callClaudeText } from '../src/lib/anthropic.js';
-import { parseResponse } from '../src/utils/json.js';
-import { taxCalc } from '../src/utils/tax.js';
+import { calculateEvaluatorResult } from '../src/lib/calculator/evaluatorCalculator.js';
 
-export default async function handler(req, res) {
+export default function handler(req, res) {
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method Not Allowed' });
     return;
@@ -28,22 +24,6 @@ export default async function handler(req, res) {
     return;
   }
 
-  try {
-    const userPrompt = buildEvaluatorUserPrompt(payload);
-    const rawText = await callClaudeText({ system: EVALUATOR_SYSTEM_PROMPT, userPrompt, maxTokens: 4000 });
-    const result = parseResponse(rawText);
-
-    // Igual que en kpi-estimate: la viabilidad presupuestaria es determinística,
-    // se recalcula en código en vez de confiar en el número de la IA.
-    if (payload.presupuesto && result.viabilidad) {
-      const { neto } = taxCalc(payload.presupuesto);
-      result.viabilidad.presupuesto_bruto = Number(payload.presupuesto) || 0;
-      result.viabilidad.presupuesto_neto = neto;
-      result.viabilidad.superavit_deficit = neto - (result.viabilidad.costo_estimado || 0);
-    }
-
-    res.status(200).json(result);
-  } catch (err) {
-    res.status(err.statusCode || 502).json({ error: err.message, detail: err.detail, raw: err.raw });
-  }
+  const result = calculateEvaluatorResult(payload);
+  res.status(200).json(result);
 }

@@ -1,5 +1,5 @@
 // 3 grupos de plataformas: Paid/Ads (7), Orgánico/Social (6), Otros (3).
-// Determina qué SOP aplica la IA (Ignite = pauta con NSM+Tax Check, Comunidad = SMART orgánico).
+// Determina qué SOP aplica la calculadora (Ignite = pauta con NSM+Tax Check, Comunidad = SMART orgánico).
 export const PLATFORM_GROUPS = [
   {
     group: 'Paid / Ads',

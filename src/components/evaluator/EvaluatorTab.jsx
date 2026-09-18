@@ -1,12 +1,12 @@
+import { useState } from 'react';
 import { useEvaluatorForm } from '../../hooks/useEvaluatorForm.js';
-import { useClaude } from '../../hooks/useClaude.js';
-import { EVALUATOR_SYSTEM_PROMPT } from '../../prompts/evaluator.js';
-import { buildEvaluatorUserPrompt } from '../../lib/promptBuilders.js';
+import { calculateEvaluatorResult } from '../../lib/calculator/evaluatorCalculator.js';
 import EvaluatorForm from './EvaluatorForm.jsx';
 import EvaluatorResult from './EvaluatorResult.jsx';
 
 // Mismo shape que espera /api/kpi-evaluate en el body — un solo lugar
-// construye el texto del prompt, lo use el formulario o una herramienta externa.
+// (src/lib/calculator/) calcula el resultado, lo use el formulario o una
+// herramienta externa vía la API pública.
 function formToFields(form) {
   return {
     cliente: form.clients.find((c) => c.value === form.clientValue)?.label,
@@ -28,17 +28,24 @@ function formToFields(form) {
 
 export default function EvaluatorTab() {
   const form = useEvaluatorForm();
-  const { data, loading, error, call } = useClaude();
+  const [data, setData] = useState(null);
+  const [error, setError] = useState(null);
 
   const handleSubmit = () => {
-    const userPrompt = buildEvaluatorUserPrompt(formToFields(form));
-    call(EVALUATOR_SYSTEM_PROMPT, userPrompt, 4000);
+    try {
+      const result = calculateEvaluatorResult(formToFields(form));
+      setData(result);
+      setError(null);
+    } catch (err) {
+      setError(err.message || 'No se pudo auditar el KPI con los datos ingresados.');
+      setData(null);
+    }
   };
 
   return (
     <div className="split">
-      <EvaluatorForm form={form} onSubmit={handleSubmit} loading={loading} />
-      <EvaluatorResult data={data} loading={loading} error={error} moneda={form.moneda} />
+      <EvaluatorForm form={form} onSubmit={handleSubmit} loading={false} />
+      <EvaluatorResult data={data} loading={false} error={error} moneda={form.moneda} />
     </div>
   );
 }

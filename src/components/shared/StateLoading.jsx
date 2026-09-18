@@ -1,4 +1,4 @@
-export default function StateLoading({ label = 'Consultando a Claude…' }) {
+export default function StateLoading({ label = 'Calculando…' }) {
   return (
     <div className="state-box">
       <div className="spinner" />

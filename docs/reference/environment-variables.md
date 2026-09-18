@@ -2,17 +2,18 @@
 
 | Variable | Dónde se usa | Obligatoria | Notas |
 |---|---|---|---|
-| `ANTHROPIC_API_KEY` | `api/claude.js`, `kpi-estimate.js`, `kpi-evaluate.js` (Vercel) y sus equivalentes en `netlify/functions/` — vía `src/lib/anthropic.js` en los dos endpoints de la API pública | Sí | Nunca se lee del bundle del frontend. Local: `.env.local` (gitignoreado). Producción: cargarla en el proyecto de la plataforma que estés usando (Vercel o Netlify) — ver [deploy-to-vercel.md](../how-to/deploy-to-vercel.md). |
-| `NORTE_API_KEY` | `kpi-estimate.js`, `kpi-evaluate.js`, en ambas plataformas (vía `src/lib/apiAuth.js`) | Solo si vas a usar la [API pública](api.md) | Key propia de Norte-kpi para autenticar herramientas externas — **no es la de Anthropic**, no se usa para llamar a `api.anthropic.com`. Sin ella cargada, ambos endpoints devuelven `500` (la API queda deshabilitada, no abierta). |
+| `NORTE_API_KEY` | `kpi-estimate.js`, `kpi-evaluate.js`, en ambas plataformas (vía `src/lib/apiAuth.js`) | Solo si vas a usar la [API pública](api.md) | Key propia de Norte-kpi para autenticar herramientas externas. Sin ella cargada, ambos endpoints devuelven `500` (la API queda deshabilitada, no abierta). |
 
-Hay que cargar ambas variables **por separado en cada plataforma** que
-efectivamente uses (Vercel y/o Netlify) — no se comparten automáticamente
-entre ellas, aunque sea el mismo repo.
+Es la **única** variable de entorno del proyecto. El wizard y el Evaluador
+no necesitan ninguna: calculan todo en el browser, sin llamar a ningún
+servicio externo — ver [explanation: motor de cálculo](../explanation/calculation-engine.md).
+Tampoco hace falta ninguna variable `VITE_*` para el frontend, ni nada para
+build.
 
-No hay más variables de entorno en el proyecto hoy — ni para el frontend
-(Vite no expone ninguna variable `VITE_*` porque no las necesita: todo lo que
-el frontend necesita es la URL relativa `/api/claude`) ni para build.
+Hay que cargar `NORTE_API_KEY` **por separado en cada plataforma** que
+efectivamente uses para la API pública (Vercel y/o Netlify) — no se comparte
+automáticamente entre ellas, aunque sea el mismo repo.
 
 Ver [`.env.example`](../../.env.example) para el formato exacto, y
-[cómo cargarlas en Vercel](../how-to/deploy-to-vercel.md#cargar-las-api-keys)
+[cómo cargarla en Vercel](../how-to/deploy-to-vercel.md#cargar-las-api-keys)
 o en [Netlify](../how-to/deploy-to-netlify.md#cargar-la-api-key).
