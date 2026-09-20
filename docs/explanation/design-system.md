@@ -1,4 +1,4 @@
-# Design system: por qué se usan los tokens reales de Taquion
+# Sistema de diseño (Design System): por qué se usan los tokens reales de Taquion
 
 ## De dónde viene
 

@@ -44,7 +44,7 @@ nunca los "recuerda" ni los aproxima.
 Con la categoría y los benchmarks en mano, el cálculo de la proyección es
 aritmética simple:
 
-- **Con presupuesto declarado**: se calcula el neto (ver Tax Check abajo) y
+- **Con presupuesto declarado**: se calcula el neto (ver Chequeo impositivo / Tax Check abajo) y
   se divide por el benchmark de costo por unidad de la categoría (ej. CPL) o
   se multiplica por el benchmark de retorno (ej. ROAS), según corresponda.
   El rango `proyeccion_min`/`proyeccion_max` sale de aplicar el extremo más
@@ -56,7 +56,7 @@ Para el Evaluador, la misma lógica se usa en sentido inverso: a partir del
 número que declaró el equipo (ej. "500 leads") y el benchmark de costo, se
 estima el costo total y se compara contra el neto disponible.
 
-## Tax Check — el único cálculo que nunca cambió
+## Chequeo impositivo (Tax Check) — el único cálculo que nunca cambió
 
 ```
 neto = bruto × (1 − 0.10 − 0.21 − 0.04) = bruto × 0.65

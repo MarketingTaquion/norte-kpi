@@ -7,16 +7,16 @@ probablemente esté en otra categoría de esta misma lista.
 
 | Categoría | Respondé esto | Cuándo mirarla |
 |---|---|---|
-| [Tutorials](tutorials/) | "Nunca usé esto, guiame de punta a punta" | Primera vez que corrés el proyecto |
-| [How-to guides](how-to/) | "Ya sé usar esto, ¿cómo hago X puntual?" | Tenés una tarea concreta para resolver |
-| [Reference](reference/) | "Necesito el dato exacto" | Ya sabés qué buscás, solo necesitás el detalle |
-| [Explanation](explanation/) | "Quiero entender el porqué" | Vas a tomar una decisión de diseño o revisar una existente |
+| [Tutoriales (Tutorials)](tutorials/) | "Nunca usé esto, guiame de punta a punta" | Primera vez que corrés el proyecto |
+| [Guías prácticas (How-To Guides)](how-to/) | "Ya sé usar esto, ¿cómo hago X puntual?" | Tenés una tarea concreta para resolver |
+| [Referencia (Reference)](reference/) | "Necesito el dato exacto" | Ya sabés qué buscás, solo necesitás el detalle |
+| [Explicación (Explanation)](explanation/) | "Quiero entender el porqué" | Vas a tomar una decisión de diseño o revisar una existente |
 
-## Tutorials
+## Tutoriales (Tutorials)
 
 - [Levantar Norte-kpi localmente y generar tu primera estimación](tutorials/getting-started.md)
 
-## How-to guides
+## Guías prácticas (How-To Guides)
 
 - [Probar la API pública en local con Netlify Dev](how-to/run-locally-with-netlify-dev.md)
 - [Deployar a Vercel](how-to/deploy-to-vercel.md) — plataforma principal
@@ -24,7 +24,7 @@ probablemente esté en otra categoría de esta misma lista.
 - [Actualizar benchmarks y reglas de la calculadora](how-to/update-kpi-rules-and-benchmarks.md)
 - [Integrar una herramienta externa (API pública)](how-to/integrate-external-tool.md)
 
-## Reference
+## Referencia (Reference)
 
 - [Estructura del repositorio](reference/repository-structure.md)
 - [API pública — `/api/kpi-estimate` y `/api/kpi-evaluate`](reference/api.md)
@@ -33,11 +33,11 @@ probablemente esté en otra categoría de esta misma lista.
 - [Datos de configuración (clientes, etapas, plataformas, lapsos)](reference/configuration-data.md)
 - [Variables de entorno](reference/environment-variables.md)
 
-## Explanation
+## Explicación (Explanation)
 
 - [Arquitectura: por qué el cálculo es client-side y la API es opcional](explanation/architecture.md)
 - [Motor de cálculo: por qué es 100% determinístico, sin IA](explanation/calculation-engine.md)
-- [Design system: por qué se usan los tokens reales de Taquion](explanation/design-system.md)
+- [Sistema de diseño (Design System): por qué se usan los tokens reales de Taquion](explanation/design-system.md)
 - [Por qué el Seteador es un wizard y el Evaluador no](explanation/product-decisions.md)
 
 ---

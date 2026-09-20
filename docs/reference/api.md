@@ -20,7 +20,7 @@ Ambas comparten la misma lógica de negocio desde
 duplicado entre plataformas, solo el archivo de entrada que Vercel/Netlify
 esperan en su propia convención.
 
-## Auth
+## Autenticación (Auth)
 
 Todas las requests necesitan el header:
 
@@ -50,7 +50,7 @@ Función real: [`api/kpi-estimate.js`](../../api/kpi-estimate.js) (Vercel) / [`n
 Calcula con [`calculateSetterResult()`](../../src/lib/calculator/setterCalculator.js) — ver
 [schema de salida completo](output-schema.md#seteador--calculatesetterresult).
 
-### Request
+### Solicitud (Request)
 
 ```
 POST /api/kpi-estimate
@@ -83,7 +83,7 @@ Ejemplo:
 }
 ```
 
-### Response `200`
+### Respuesta (Response) `200`
 
 El mismo JSON que consume `SetterResult.jsx` — ver
 [schema completo](output-schema.md#seteador--calculatesetterresult).
@@ -93,7 +93,7 @@ El mismo JSON que consume `SetterResult.jsx` — ver
 | Status | Causa |
 |---|---|
 | `405` | Método distinto de `POST` |
-| `401` / `500` | Ver sección Auth |
+| `401` / `500` | Ver sección Autenticación (Auth) |
 | `400` | Body no es JSON válido |
 | `422` | Falta `cliente` o `pedidos` (o `pedidos` está vacío) |
 | `500` | Excepción no esperada del cálculo (ej. un `periodo` malformado) — no debería pasar con input válido |
@@ -107,7 +107,7 @@ Función real: [`api/kpi-evaluate.js`](../../api/kpi-evaluate.js) (Vercel) / [`n
 Calcula con [`calculateEvaluatorResult()`](../../src/lib/calculator/evaluatorCalculator.js) — ver
 [schema de salida completo](output-schema.md#evaluador--calculateevaluatorresult).
 
-### Request
+### Solicitud (Request)
 
 ```
 POST /api/kpi-evaluate
@@ -144,7 +144,7 @@ Ejemplo:
 }
 ```
 
-### Response `200`
+### Respuesta (Response) `200`
 
 El mismo JSON que consume `EvaluatorResult.jsx` — ver
 [schema completo](output-schema.md#evaluador--calculateevaluatorresult).

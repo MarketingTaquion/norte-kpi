@@ -1,4 +1,4 @@
-# Norte-kpi — Spec
+# Norte-kpi — Especificación (Spec)
 
 Taquion / Ignite — documento interno · v1.0 · Septiembre 2026
 
@@ -30,7 +30,7 @@ forma independiente** cualquier KPI antes de presentarlo al cliente.
 Ver [`docs/index.md`](index.md) para arquitectura, motor de cálculo, design
 system y todo el detalle técnico.
 
-## Roadmap
+## Hoja de ruta (Roadmap)
 
 | Feature | Prioridad | Nota |
 |---|---|---|

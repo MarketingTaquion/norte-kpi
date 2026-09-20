@@ -14,7 +14,7 @@ secundaria) para integrar otras herramientas.
 - **API pública** (para integrar otras herramientas): [`docs/reference/api.md`](docs/reference/api.md)
 - **Deploy**: [Vercel](docs/how-to/deploy-to-vercel.md) es la plataforma principal (auto-deploy en cada push). [Netlify](docs/how-to/deploy-to-netlify.md) queda como secundaria, requiere confirmación antes de deployar ahí.
 
-## Quick start
+## Inicio rápido (Quick Start)
 
 ```bash
 git clone https://github.com/MarketingTaquion/norte-kpi.git
