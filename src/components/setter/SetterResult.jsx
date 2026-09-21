@@ -1,12 +1,12 @@
 import StateEmpty from '../shared/StateEmpty.jsx';
 import StateLoading from '../shared/StateLoading.jsx';
 import ErrorBox from '../shared/ErrorBox.jsx';
-import NsmBanner from './NsmBanner.jsx';
-import KpiTable from './KpiTable.jsx';
-import PacingGrid from './PacingGrid.jsx';
+import TaxCheckStrip from './TaxCheckStrip.jsx';
+import PacingTracker from './PacingTracker.jsx';
+import KpiCards from './KpiCards.jsx';
 import { fmtN } from '../../utils/tax.js';
 
-export default function SetterResult({ data, loading, error, moneda }) {
+export default function SetterResult({ data, loading, error, moneda, clientLabel, onNewEstimate }) {
   if (loading) return <div className="panel"><StateLoading label="Traduciendo pedidos a KPIs SMART…" /></div>;
   if (error) return <div className="panel"><ErrorBox message={error} /></div>;
   if (!data) {
@@ -21,10 +21,41 @@ export default function SetterResult({ data, loading, error, moneda }) {
   }
 
   const stats = data.stats || {};
+  const hasChecklist = data.checklist_nsm && data.checklist_nsm.length > 0;
+  const hasProximosPasos = data.proximos_pasos && data.proximos_pasos.length > 0;
 
   return (
     <div>
-      <NsmBanner nsm={data.nsm} />
+      <TaxCheckStrip taxCheck={data.tax_check} moneda={moneda} />
+      <PacingTracker pacing={data.pacing} />
+
+      {hasChecklist || hasProximosPasos ? (
+        <div className="checklist-pasos-grid">
+          {hasChecklist ? (
+            <div>
+              <h3 className="section-heading">Checklist NSM</h3>
+              <ul className="list-plain">
+                {data.checklist_nsm.map((item, i) => <li key={i}>{item}</li>)}
+              </ul>
+            </div>
+          ) : null}
+          {hasProximosPasos ? (
+            <div>
+              <h3 className="section-heading">Próximos pasos</h3>
+              <ul className="list-plain">
+                {data.proximos_pasos.map((item, i) => <li key={i}>{item}</li>)}
+              </ul>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+
+      <div className="results-topbar">
+        <span className="wizard-step-eyebrow">Estimación · {clientLabel}</span>
+        <button type="button" className="btn-secondary" onClick={onNewEstimate}>
+          + Nueva estimación
+        </button>
+      </div>
 
       <div className="stats-grid">
         <div className="stat-card">
@@ -45,39 +76,7 @@ export default function SetterResult({ data, loading, error, moneda }) {
         </div>
       </div>
 
-      {data.tax_check && data.tax_check.bruto > 0 ? (
-        <div className="section-block">
-          <h3 className="section-heading">Tax Check</h3>
-          <div className="tax-preview">
-            <div className="tax-preview-row"><span>Bruto</span><span>{fmtN(data.tax_check.bruto, moneda)}</span></div>
-            <div className="tax-preview-row"><span>Fee</span><span>−{fmtN(data.tax_check.fee, moneda)}</span></div>
-            <div className="tax-preview-row"><span>IVA</span><span>−{fmtN(data.tax_check.iva, moneda)}</span></div>
-            <div className="tax-preview-row"><span>Percepciones</span><span>−{fmtN(data.tax_check.percepciones, moneda)}</span></div>
-            <div className="tax-preview-row total"><span>Neto</span><span>{fmtN(data.tax_check.neto, moneda)}</span></div>
-          </div>
-        </div>
-      ) : null}
-
-      <KpiTable kpis={data.kpis} />
-      <PacingGrid pacing={data.pacing} />
-
-      {data.checklist_nsm && data.checklist_nsm.length > 0 ? (
-        <div className="section-block">
-          <h3 className="section-heading">Checklist NSM</h3>
-          <ul className="list-plain">
-            {data.checklist_nsm.map((item, i) => <li key={i}>{item}</li>)}
-          </ul>
-        </div>
-      ) : null}
-
-      {data.proximos_pasos && data.proximos_pasos.length > 0 ? (
-        <div className="section-block">
-          <h3 className="section-heading">Próximos pasos</h3>
-          <ul className="list-plain">
-            {data.proximos_pasos.map((item, i) => <li key={i}>{item}</li>)}
-          </ul>
-        </div>
-      ) : null}
+      <KpiCards kpis={data.kpis} />
 
       {data.resumen_ejecutivo ? (
         <div className="panel">

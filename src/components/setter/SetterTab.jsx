@@ -52,14 +52,13 @@ export default function SetterTab() {
   }
 
   return (
-    <div>
-      <div className="results-topbar">
-        <span className="wizard-step-eyebrow">Estimación · {form.clients.find((c) => c.value === form.clientValue)?.label}</span>
-        <button type="button" className="btn-secondary" onClick={handleNewEstimate}>
-          + Nueva estimación
-        </button>
-      </div>
-      <SetterResult data={data} loading={false} error={error} moneda={form.moneda} />
-    </div>
+    <SetterResult
+      data={data}
+      loading={false}
+      error={error}
+      moneda={form.moneda}
+      clientLabel={form.clients.find((c) => c.value === form.clientValue)?.label}
+      onNewEstimate={handleNewEstimate}
+    />
   );
 }

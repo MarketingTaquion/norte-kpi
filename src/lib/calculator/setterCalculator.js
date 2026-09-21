@@ -86,6 +86,24 @@ function proyectarKpi(category, neto) {
   }
 }
 
+// "Agresividad" de la proyección — qué tan ancho es el rango de benchmark
+// de la categoría (max/min), en escala logarítmica 0–100. Un ratio angosto
+// (ej. retencion, min=max) es la proyección más "conservadora" posible; un
+// ratio ancho (ej. leads, trafico) implica más upside pero menos certeza —
+// más "agresiva". Es una propiedad de la categoría, no del pedido puntual:
+// el proyeccion_min/max de este calculador siempre abarca el benchmark
+// completo, así que no hay una posición-dentro-del-benchmark que variar.
+const AGRESIVIDAD_RATIO_MAX = 6;
+
+function agresividadPct(category) {
+  const key = category.costoBenchmarkKey || category.benchmarkKey;
+  const b = key ? BENCHMARKS[key] : null;
+  if (!b || !b.min || b.min <= 0) return 0;
+  const ratio = b.max / b.min;
+  if (ratio <= 1) return 0;
+  return Math.round(Math.min(100, (Math.log(ratio) / Math.log(AGRESIVIDAD_RATIO_MAX)) * 100));
+}
+
 function inferirNsm(kpis, nsmDeclarada) {
   if (nsmDeclarada) {
     return { metrica: nsmDeclarada, razon: 'Declarada por el equipo comercial — se usa como brújula del resto de la matriz.' };
@@ -150,6 +168,7 @@ export function calculateSetterResult(fields) {
       meta_realista: meta,
       proyeccion_min: min,
       proyeccion_max: max,
+      agresividad_pct: agresividadPct(category),
     };
   });
 

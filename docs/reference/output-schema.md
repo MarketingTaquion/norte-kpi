@@ -29,7 +29,8 @@ consumidores.
       "fuente_verdad": "string",
       "meta_realista": "string",
       "proyeccion_min": 0,
-      "proyeccion_max": 0
+      "proyeccion_max": 0,
+      "agresividad_pct": 0
     }
   ],
   "pacing": [
@@ -46,6 +47,15 @@ consumidores.
 
 Ver [reference: calculadora](calculator.md) para cómo se llega a cada valor
 (categoría, benchmark, `modo` de proyección).
+
+`agresividad_pct` (0–100) es una propiedad de la **categoría**, no del
+pedido puntual: `proyeccion_min`/`proyeccion_max` siempre abarcan el
+benchmark completo de la categoría (no hay una posición-dentro-del-rango
+que varíe con el presupuesto), así que se deriva del ratio `max/min` del
+benchmark en escala logarítmica — un rango angosto (ej. retención) da un
+valor bajo ("conservador"); uno ancho (ej. leads, tráfico) da un valor alto
+("agresivo"). Repetir el cálculo para la misma categoría siempre da el mismo
+valor.
 
 ## Evaluador — `calculateEvaluatorResult()`
 

@@ -1,4 +1,4 @@
-import ConfidenceGauge from '../shared/ConfidenceGauge.jsx';
+import SeverityGauge from '../shared/SeverityGauge.jsx';
 
 const LABELS = {
   APROBADO: 'Aprobado',
@@ -14,7 +14,7 @@ export default function VerdictBanner({ veredicto, confianza }) {
     <div className={cls}>
       <div className="banner-title">Veredicto</div>
       <div className="banner-value">{LABELS[veredicto] || veredicto}</div>
-      {confianza != null ? <ConfidenceGauge confianza={confianza} /> : null}
+      {confianza != null ? <SeverityGauge value={confianza} lowLabel="Baja" highLabel="Alta" /> : null}
     </div>
   );
 }
