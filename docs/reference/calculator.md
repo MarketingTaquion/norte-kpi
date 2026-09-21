@@ -87,6 +87,12 @@ Sin presupuesto declarado, **cualquier** categoría devuelve el rango de
 benchmark crudo, marcado como referencial — nunca se fuerza un número
 cerrado sin plata detrás.
 
+Las categorías `alcance` y `seguidores` (las que proyectan personas, no
+plata/leads/clics/%) tienen además un segundo techo, independiente del
+presupuesto: la población real de la localidad declarada. Ver
+[reference: territorios](territorios.md) para el detalle completo (fuentes,
+cómo se calcula, qué plataformas tienen techo aplicable).
+
 ## Reglas del Evaluador — detección de patrones
 
 `evaluatorCalculator.js` aplica estas reglas concretas (no "juicio" de

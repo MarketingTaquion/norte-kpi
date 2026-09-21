@@ -9,6 +9,9 @@ import { LAPSOS } from '../../data/lapsos.js';
 import { fmtN } from '../../utils/tax.js';
 import { CATEGORY_OPTIONS } from '../../lib/calculator/kpiCatalog.js';
 import { PRESUPUESTO_OPTIONS } from '../../data/presupuestos.js';
+import { TERRITORIOS } from '../../data/territorios.js';
+import { RANGOS_ETARIOS } from '../../data/rangosEtarios.js';
+import { RUBROS } from '../../data/rubros.js';
 
 const STEPS = [
   { key: 'cliente', eyebrow: 'Paso 1 · Contexto', title: '¿Para qué cliente es esta estimación?' },
@@ -16,9 +19,20 @@ const STEPS = [
   { key: 'periodo', eyebrow: 'Paso 3 · Alcance', title: '¿Qué período vamos a proyectar?' },
   { key: 'presupuesto', eyebrow: 'Paso 4 · Alcance', title: '¿Con qué presupuesto contamos?' },
   { key: 'plataformas', eyebrow: 'Paso 5 · Alcance', title: '¿Qué plataformas están activas?' },
-  { key: 'pedidos', eyebrow: 'Paso 6 · Pedido del cliente', title: '¿Qué pidió el cliente, en sus palabras?' },
-  { key: 'revision', eyebrow: 'Paso 7 · Confirmación', title: 'Revisá antes de generar la estimación' },
+  { key: 'territorio', eyebrow: 'Paso 6 · Territorio', title: '¿En qué zona impactamos?' },
+  { key: 'pedidos', eyebrow: 'Paso 7 · Pedido del cliente', title: '¿Qué pidió el cliente, en sus palabras?' },
+  { key: 'revision', eyebrow: 'Paso 8 · Confirmación', title: 'Revisá antes de generar la estimación' },
 ];
+
+// Localidades agrupadas por provincia para el <select>, orden alfabético
+// dentro de cada grupo (CABA sola porque no forma parte de "Buenos Aires").
+const TERRITORIOS_POR_PROVINCIA = TERRITORIOS
+  .reduce((acc, t) => {
+    (acc[t.provincia] ||= []).push(t);
+    return acc;
+  }, {});
+Object.values(TERRITORIOS_POR_PROVINCIA).forEach((list) => list.sort((a, b) => a.label.localeCompare(b.label, 'es')));
+const PROVINCIAS_ORDENADAS = Object.keys(TERRITORIOS_POR_PROVINCIA).sort((a, b) => a.localeCompare(b, 'es'));
 
 export default function SetterWizard({ form, onComplete, loading }) {
   const [step, setStep] = useState(0);
@@ -62,6 +76,9 @@ export default function SetterWizard({ form, onComplete, loading }) {
     : (form.fechaInicio && form.fechaFin ? `${form.fechaInicio} → ${form.fechaFin}` : 'No definido');
   const pedidosValidos = form.pedidos.filter((p) => p.texto.trim().length > 0);
   const categoriaLabel = (key) => CATEGORY_OPTIONS.find((c) => c.value === key)?.label || '—';
+  const territorioLabel = TERRITORIOS.find((t) => t.value === form.territorio)?.label;
+  const rangoEtarioLabel = RANGOS_ETARIOS.find((r) => r.value === form.rangoEtario)?.label;
+  const rubroLabel = RUBROS.find((r) => r.value === form.rubro)?.label;
 
   return (
     <div className="wizard-shell">
@@ -182,6 +199,52 @@ export default function SetterWizard({ form, onComplete, loading }) {
           </div>
         )}
 
+        {STEPS[step].key === 'territorio' && (
+          <div>
+            <p className="wizard-step-hint" style={{ marginTop: 0, marginBottom: 14 }}>
+              Opcional, pero recomendado — con la zona, la calculadora acota el
+              alcance/seguidores proyectados a la población real del lugar (en
+              vez de un número referencial sin techo). Ver{' '}
+              <a href="https://github.com/MarketingTaquion/norte-kpi/blob/master/docs/reference/territorios.md" target="_blank" rel="noreferrer">
+                de dónde salen estos datos
+              </a>.
+            </p>
+            <div className="field">
+              <label className="field-label">Localidad</label>
+              <select value={form.territorio} onChange={(e) => form.setTerritorio(e.target.value)}>
+                <option value="">Sin localidad declarada…</option>
+                {PROVINCIAS_ORDENADAS.map((provincia) => (
+                  <optgroup key={provincia} label={provincia}>
+                    {TERRITORIOS_POR_PROVINCIA[provincia].map((t) => (
+                      <option key={t.value} value={t.value}>{t.label}</option>
+                    ))}
+                  </optgroup>
+                ))}
+              </select>
+            </div>
+            <div className="budget-row" style={{ marginTop: 12 }}>
+              <div className="field" style={{ marginBottom: 0 }}>
+                <label className="field-label">Rango etario objetivo</label>
+                <select value={form.rangoEtario} onChange={(e) => form.setRangoEtario(e.target.value)}>
+                  <option value="">Toda la población…</option>
+                  {RANGOS_ETARIOS.map((r) => (
+                    <option key={r.value} value={r.value}>{r.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="field" style={{ marginBottom: 0 }}>
+                <label className="field-label">Rubro / interés</label>
+                <select value={form.rubro} onChange={(e) => form.setRubro(e.target.value)}>
+                  <option value="">Sin acotar…</option>
+                  {RUBROS.map((r) => (
+                    <option key={r.value} value={r.value}>{r.label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+        )}
+
         {STEPS[step].key === 'pedidos' && (
           <div>
             <p className="wizard-step-hint" style={{ marginTop: 0, marginBottom: 14 }}>
@@ -251,6 +314,16 @@ export default function SetterWizard({ form, onComplete, loading }) {
                 <span className="r-label">Plataformas</span>
                 <span className="r-value">{plataformaLabels.length ? plataformaLabels.join(', ') : 'No especificadas'}</span>
               </div>
+              <div className="review-row">
+                <span className="r-label">Territorio</span>
+                <span className="r-value">{territorioLabel || 'No declarado'}</span>
+              </div>
+              {territorioLabel ? (
+                <div className="review-row">
+                  <span className="r-label">Rango etario / rubro</span>
+                  <span className="r-value">{rangoEtarioLabel || 'Toda la población'} · {rubroLabel || 'Sin acotar'}</span>
+                </div>
+              ) : null}
               <div className="review-row">
                 <span className="r-label">North Star Metric</span>
                 <span className="r-value">{form.nsm || 'A inferir automáticamente'}</span>

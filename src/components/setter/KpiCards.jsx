@@ -14,6 +14,7 @@ export default function KpiCards({ kpis }) {
           </div>
           <div className="kpi-card-title">{k.kpi_tecnico}</div>
           {k.formula ? <div className="kpi-card-formula">{k.formula}</div> : null}
+          {k.territorio ? <div className="kpi-card-territorio">Territorio: {k.territorio}</div> : null}
 
           <div className="kpi-card-grid">
             <div>
@@ -39,6 +40,21 @@ export default function KpiCards({ kpis }) {
               />
             </div>
           </div>
+
+          {k.por_plataforma && k.por_plataforma.length > 0 ? (
+            <div className="kpi-card-plataformas">
+              <div className="kpi-card-col-label">Por plataforma</div>
+              {k.por_plataforma.map((p, j) => (
+                <div key={j} className="kpi-card-plataforma-row">
+                  <span className="kpi-card-plataforma-nombre">{p.plataforma}</span>
+                  <span className="kpi-card-plataforma-valor">
+                    {p.proyeccion_min} — {p.proyeccion_max}
+                    {p.techo_poblacional != null ? ' (limitado por población)' : ''}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : null}
         </div>
       ))}
     </div>

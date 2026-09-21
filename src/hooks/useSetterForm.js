@@ -15,6 +15,9 @@ export function useSetterForm() {
   const [presupuesto, setPresupuesto] = useState('');
   const [moneda, setMoneda] = useState('ARS');
   const [platformValues, setPlatformValues] = useState([]);
+  const [territorio, setTerritorio] = useState('');
+  const [rangoEtario, setRangoEtario] = useState('');
+  const [rubro, setRubro] = useState('');
   const [pedidos, setPedidos] = useState([{ ...EMPTY_PEDIDO }]);
   const [nsm, setNsm] = useState('');
 
@@ -69,6 +72,9 @@ export function useSetterForm() {
     setPresupuesto('');
     setMoneda('ARS');
     setPlatformValues([]);
+    setTerritorio('');
+    setRangoEtario('');
+    setRubro('');
     setPedidos([{ ...EMPTY_PEDIDO }]);
     setNsm('');
   };
@@ -79,6 +85,7 @@ export function useSetterForm() {
     periodMode, setPeriodMode, lapsoValue, setLapsoValue, fechaInicio, setFechaInicio, fechaFin, setFechaFin,
     presupuesto, setPresupuesto, moneda, setMoneda,
     platformValues, togglePlatform,
+    territorio, setTerritorio, rangoEtario, setRangoEtario, rubro, setRubro,
     pedidos, updatePedidoTexto, updatePedidoCategoria, addPedido, removePedido, maxPedidos: MAX_PEDIDOS,
     pedidosIncompletos,
     nsm, setNsm,

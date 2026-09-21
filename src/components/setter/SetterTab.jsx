@@ -17,6 +17,9 @@ function formToFields(form) {
     presupuesto: form.presupuesto,
     moneda: form.moneda,
     plataformas: form.platformValues,
+    territorio: form.territorio,
+    rangoEtario: form.rangoEtario,
+    rubro: form.rubro,
     pedidos: form.pedidos,
     nsm: form.nsm,
   };

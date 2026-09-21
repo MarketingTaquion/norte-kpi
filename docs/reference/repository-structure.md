@@ -14,9 +14,9 @@ norte-kpi/
 ├── src/
 │   ├── styles/tokens.css             ← tokens de marca Taquion 2026 (fuente de verdad, ver explanation/design-system.md)
 │   ├── index.css                     ← estilos de la app, consume los tokens
-│   ├── data/                         ← clientes, etapas, plataformas, lapsos (ver reference/configuration-data.md)
+│   ├── data/                         ← clientes, etapas, plataformas, lapsos, territorios, rangos etarios, rubros (ver reference/configuration-data.md, reference/territorios.md)
 │   ├── lib/
-│   │   ├── calculator/               ← el "cerebro": categorías, benchmarks, cálculo (ver reference/calculator.md)
+│   │   ├── calculator/               ← el "cerebro": categorías, benchmarks, territorio, cálculo (ver reference/calculator.md, reference/territorios.md)
 │   │   └── apiAuth.js                ← auth de la API pública (X-Api-Key), compartido entre api/ y netlify/functions/
 │   ├── hooks/                        ← useSetterForm, useEvaluatorForm
 │   ├── utils/tax.js                  ← Tax Check (bruto → neto)

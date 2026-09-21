@@ -8,6 +8,7 @@ import { LAPSOS } from '../../data/lapsos.js';
 import { taxCalc } from '../../utils/tax.js';
 import { classifyText, findCategory, fuenteDeVerdad } from './kpiCatalog.js';
 import { BENCHMARKS, midpoint } from './benchmarks.js';
+import { findTerritorio, findRangoEtario, findRubro, techoPoblacional } from './territorio.js';
 
 const ALL_PLATFORMS = PLATFORM_GROUPS.flatMap((g) => g.items);
 const PACING_BLOQUES = ['25%', '50%', '75%', '100%'];
@@ -104,6 +105,14 @@ function agresividadPct(category) {
   return Math.round(Math.min(100, (Math.log(ratio) / Math.log(AGRESIVIDAD_RATIO_MAX)) * 100));
 }
 
+// Categorías cuyo número representa personas/audiencia (no plata, leads,
+// clics ni un %) — son las que se recortan contra el techo poblacional del
+// territorio para no proyectar más "alcance" o "seguidores" que gente vive
+// en la zona. Ver src/lib/calculator/territorio.js.
+function esAlcancePersonas(category) {
+  return category.modo === 'alcance' || category.key === 'seguidores';
+}
+
 function inferirNsm(kpis, nsmDeclarada) {
   if (nsmDeclarada) {
     return { metrica: nsmDeclarada, razon: 'Declarada por el equipo comercial — se usa como brújula del resto de la matriz.' };
@@ -139,6 +148,7 @@ function armarPacing(kpis, dias) {
 export function calculateSetterResult(fields) {
   const {
     etapas = [], periodo, presupuesto, moneda = 'ARS', plataformas = [], pedidos = [], nsm,
+    territorio, rangoEtario, rubro,
   } = fields || {};
 
   const etapaLabels = resolveLabels(STAGES, etapas);
@@ -151,13 +161,53 @@ export function calculateSetterResult(fields) {
   const taxCheck = taxCalc(presupuesto || 0);
   const netoTotal = taxCheck.neto;
   const netoPorPedido = pedidosValidos.length > 0 ? netoTotal / pedidosValidos.length : 0;
+  const netoPorPlataforma = plataformas.length > 0 ? netoPorPedido / plataformas.length : netoPorPedido;
 
   const setupForzado = etapaLabels.some((l) => l.toLowerCase().startsWith('setup'));
+
+  const territorioObj = findTerritorio(territorio);
+  const rangoEtarioObj = findRangoEtario(rangoEtario);
+  const rubroObj = findRubro(rubro);
 
   const kpis = pedidosValidos.map((pedido) => {
     const category = findCategory(pedido.categoria) || classifyText(pedido.texto);
     const sop = setupForzado && category.sop !== 'SOP Ignite' ? 'SOP Setup' : category.sop;
-    const { min, max, meta } = proyectarKpi(category, netoPorPedido);
+    const alcancePersonas = esAlcancePersonas(category);
+    let { min, max, meta } = proyectarKpi(category, netoPorPedido);
+
+    // Desglose por plataforma — cada plataforma seleccionada se lleva una
+    // porción igual del neto, y (si aplica) su propio techo poblacional.
+    const porPlataforma = plataformas.length > 0
+      ? plataformas.map((platValue) => {
+        const platLabel = ALL_PLATFORMS.find((p) => p.value === platValue)?.label || platValue;
+        const { min: pMin, max: pMax } = proyectarKpi(category, netoPorPlataforma);
+        const techo = alcancePersonas ? techoPoblacional(territorioObj, platValue, rangoEtarioObj, rubroObj) : null;
+        return {
+          plataforma: platLabel,
+          proyeccion_min: techo != null ? Math.min(pMin, techo) : pMin,
+          proyeccion_max: techo != null ? Math.min(pMax, techo) : pMax,
+          techo_poblacional: techo,
+        };
+      })
+      : null;
+
+    // El número "agregado" de arriba también se recorta contra el mayor
+    // techo poblacional entre las plataformas seleccionadas — evita que la
+    // proyección diga, por ejemplo, más seguidores que gente vive en la zona.
+    if (alcancePersonas && territorioObj && plataformas.length > 0) {
+      const techos = plataformas
+        .map((p) => techoPoblacional(territorioObj, p, rangoEtarioObj, rubroObj))
+        .filter((t) => t != null);
+      if (techos.length > 0) {
+        const techoTop = Math.max(...techos);
+        if (max > techoTop) {
+          max = techoTop;
+          if (min > max) min = max;
+          meta += ` Limitado por el techo poblacional de ${territorioObj.label} (~${techoTop.toLocaleString('es-AR')} personas alcanzables).`;
+        }
+      }
+    }
+
     const texto = pedido.texto;
     return {
       pedido_original: texto.length > 95 ? `${texto.slice(0, 92)}...` : texto,
@@ -169,6 +219,8 @@ export function calculateSetterResult(fields) {
       proyeccion_min: min,
       proyeccion_max: max,
       agresividad_pct: agresividadPct(category),
+      territorio: territorioObj?.label || null,
+      por_plataforma: porPlataforma,
     };
   });
 

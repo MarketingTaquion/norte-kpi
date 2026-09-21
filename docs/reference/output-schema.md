@@ -30,7 +30,11 @@ consumidores.
       "meta_realista": "string",
       "proyeccion_min": 0,
       "proyeccion_max": 0,
-      "agresividad_pct": 0
+      "agresividad_pct": 0,
+      "territorio": "string o null si no se declaró localidad",
+      "por_plataforma": [
+        { "plataforma": "string", "proyeccion_min": 0, "proyeccion_max": 0, "techo_poblacional": "number o null" }
+      ]
     }
   ],
   "pacing": [
@@ -56,6 +60,12 @@ benchmark en escala logarítmica — un rango angosto (ej. retención) da un
 valor bajo ("conservador"); uno ancho (ej. leads, tráfico) da un valor alto
 ("agresivo"). Repetir el cálculo para la misma categoría siempre da el mismo
 valor.
+
+`territorio` y `por_plataforma` son `null` cuando no se declaró localidad —
+ver [reference: territorios](territorios.md) para de dónde sale el techo
+poblacional que recorta `alcance`/`seguidores`, qué plataformas tienen techo
+aplicable y por qué `por_plataforma` existe (una fila por plataforma
+seleccionada, con el neto dividido en partes iguales entre ellas).
 
 ## Evaluador — `calculateEvaluatorResult()`
 

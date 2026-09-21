@@ -29,6 +29,7 @@ probablemente esté en otra categoría de esta misma lista.
 - [Estructura del repositorio](reference/repository-structure.md)
 - [API pública — `/api/kpi-estimate` y `/api/kpi-evaluate`](reference/api.md)
 - [Calculadora interna — categorías, benchmarks y reglas](reference/calculator.md)
+- [Territorios — techo poblacional por localidad y plataforma](reference/territorios.md)
 - [Schema de salida (Seteador / Evaluador)](reference/output-schema.md)
 - [Datos de configuración (clientes, etapas, plataformas, lapsos)](reference/configuration-data.md)
 - [Variables de entorno](reference/environment-variables.md)

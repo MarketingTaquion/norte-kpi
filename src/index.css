@@ -679,6 +679,47 @@ input:focus, textarea:focus, select:focus {
   margin-top: 2px;
 }
 
+.kpi-card-territorio {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 11px;
+  font-weight: var(--tq-weight-semibold);
+  color: var(--tq-text-muted);
+  background: var(--tq-surface-subtle);
+  border-radius: var(--tq-radius-sm);
+  padding: 3px 9px;
+}
+
+.kpi-card-plataformas {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: var(--tq-border-hairline) solid var(--tq-line);
+}
+
+.kpi-card-plataforma-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+  padding: 6px 0;
+  border-bottom: var(--tq-border-hairline) solid var(--tq-line);
+  font-variant-numeric: tabular-nums;
+}
+
+.kpi-card-plataforma-row:last-child {
+  border-bottom: 0;
+}
+
+.kpi-card-plataforma-nombre {
+  color: var(--tq-text-body);
+  font-weight: var(--tq-weight-medium);
+}
+
+.kpi-card-plataforma-valor {
+  color: var(--tq-text-muted);
+  text-align: right;
+}
+
 .kpi-card-grid {
   display: grid;
   grid-template-columns: 1.1fr 1.1fr 0.9fr;
