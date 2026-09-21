@@ -11,7 +11,6 @@
 // fuente externa — ver el comment ahí.
 import { TERRITORIOS } from '../../data/territorios.js';
 import { RANGOS_ETARIOS } from '../../data/rangosEtarios.js';
-import { RUBROS } from '../../data/rubros.js';
 
 export const INTERNET_PENETRATION_PCT = 0.906;
 
@@ -58,10 +57,6 @@ export function findRangoEtario(value) {
   return RANGOS_ETARIOS.find((r) => r.value === value) || null;
 }
 
-export function findRubro(value) {
-  return RUBROS.find((r) => r.value === value) || null;
-}
-
 // Devuelve el techo de personas alcanzables para esa plataforma en esa
 // localidad, o null si no hay territorio declarado o la plataforma no tiene
 // familia de penetración conocida — en esos casos no se aplica recorte.
@@ -73,4 +68,15 @@ export function techoPoblacional(territorio, plataformaValue, rangoEtario, rubro
   const pctEtario = rangoEtario ? rangoEtario.pct : 1;
   const factorRubro = rubro ? rubro.factor : 1;
   return Math.round(territorio.poblacion * INTERNET_PENETRATION_PCT * penetracion * pctEtario * factorRubro);
+}
+
+// Divide un techo (o cualquier número de personas alcanzables) entre
+// "anonimizado" (exposición vía pauta/alcance, sin retorno identificable) y
+// "nominizado" (deja un dato identificable — formulario, CRM, opt-in),
+// según el `pctNominizado` del rubro. Sin rubro declarado no hay base para
+// estimar el split, así que devuelve null.
+export function desgloseIdentidad(cantidad, rubro) {
+  if (cantidad == null || !rubro) return null;
+  const nominizado = Math.round(cantidad * rubro.pctNominizado);
+  return { anonimizado: cantidad - nominizado, nominizado };
 }

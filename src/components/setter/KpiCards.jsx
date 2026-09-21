@@ -14,7 +14,12 @@ export default function KpiCards({ kpis }) {
           </div>
           <div className="kpi-card-title">{k.kpi_tecnico}</div>
           {k.formula ? <div className="kpi-card-formula">{k.formula}</div> : null}
-          {k.territorio ? <div className="kpi-card-territorio">Territorio: {k.territorio}</div> : null}
+          {k.territorio || k.rubro ? (
+            <div className="kpi-card-tags">
+              {k.territorio ? <span className="kpi-card-territorio">Territorio: {k.territorio}</span> : null}
+              {k.rubro ? <span className="kpi-card-territorio">Rubro: {k.rubro}</span> : null}
+            </div>
+          ) : null}
 
           <div className="kpi-card-grid">
             <div>
@@ -40,6 +45,21 @@ export default function KpiCards({ kpis }) {
               />
             </div>
           </div>
+
+          {k.desglose_identidad ? (
+            <div className="kpi-card-identidad">
+              <div className="kpi-card-identidad-item">
+                <div className="kpi-card-col-label">Alcanzable anónimo</div>
+                <div className="kpi-card-identidad-valor">{k.desglose_identidad.anonimizado.toLocaleString('es-AR')}</div>
+                <div className="kpi-card-identidad-nota">Exposición vía pauta/alcance, sin retorno identificable</div>
+              </div>
+              <div className="kpi-card-identidad-item">
+                <div className="kpi-card-col-label">Con identidad conocida</div>
+                <div className="kpi-card-identidad-valor">{k.desglose_identidad.nominizado.toLocaleString('es-AR')}</div>
+                <div className="kpi-card-identidad-nota">Estimado — deja un dato identificable (CRM, opt-in)</div>
+              </div>
+            </div>
+          ) : null}
 
           {k.por_plataforma && k.por_plataforma.length > 0 ? (
             <div className="kpi-card-plataformas">

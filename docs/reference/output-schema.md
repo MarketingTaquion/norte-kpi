@@ -32,9 +32,11 @@ consumidores.
       "proyeccion_max": 0,
       "agresividad_pct": 0,
       "territorio": "string o null si no se declaró localidad",
+      "rubro": "string o null si el pedido no declaró rubro",
       "por_plataforma": [
         { "plataforma": "string", "proyeccion_min": 0, "proyeccion_max": 0, "techo_poblacional": "number o null" }
-      ]
+      ],
+      "desglose_identidad": { "anonimizado": 0, "nominizado": 0 }
     }
   ],
   "pacing": [
@@ -61,11 +63,15 @@ valor bajo ("conservador"); uno ancho (ej. leads, tráfico) da un valor alto
 ("agresivo"). Repetir el cálculo para la misma categoría siempre da el mismo
 valor.
 
-`territorio` y `por_plataforma` son `null` cuando no se declaró localidad —
-ver [reference: territorios](territorios.md) para de dónde sale el techo
-poblacional que recorta `alcance`/`seguidores`, qué plataformas tienen techo
-aplicable y por qué `por_plataforma` existe (una fila por plataforma
-seleccionada, con el neto dividido en partes iguales entre ellas).
+`territorio` es `null` cuando no se declaró localidad; `rubro` es `null`
+cuando ESE pedido no declaró rubro (es un campo por pedido, no global);
+`por_plataforma` es `null` sin plataformas seleccionadas; `desglose_identidad`
+es `null` sin rubro declarado (sin rubro no hay base para estimar el split
+anonimizado/nominizado). Ver [reference: territorios](territorios.md) para
+de dónde sale el techo poblacional que recorta `alcance`/`seguidores`, qué
+plataformas tienen techo aplicable, por qué `por_plataforma` existe (una
+fila por plataforma seleccionada, con el neto dividido en partes iguales
+entre ellas), y qué representa `desglose_identidad`.
 
 ## Evaluador — `calculateEvaluatorResult()`
 

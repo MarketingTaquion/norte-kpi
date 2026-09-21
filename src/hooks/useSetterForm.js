@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
 import { DEFAULT_CLIENTS } from '../data/clients.js';
+import { classifyTextStrict } from '../lib/calculator/kpiCatalog.js';
+import { classifyRubro } from '../data/rubros.js';
 
 const MAX_PEDIDOS = 6;
-const EMPTY_PEDIDO = { texto: '', categoria: '' };
+const EMPTY_PEDIDO = { texto: '', categoria: '', rubro: '' };
 
 export function useSetterForm() {
   const [clients, setClients] = useState(DEFAULT_CLIENTS);
@@ -17,7 +19,6 @@ export function useSetterForm() {
   const [platformValues, setPlatformValues] = useState([]);
   const [territorio, setTerritorio] = useState('');
   const [rangoEtario, setRangoEtario] = useState('');
-  const [rubro, setRubro] = useState('');
   const [pedidos, setPedidos] = useState([{ ...EMPTY_PEDIDO }]);
   const [nsm, setNsm] = useState('');
 
@@ -35,12 +36,32 @@ export function useSetterForm() {
     setPlatformValues((prev) => (prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]));
   };
 
+  // Autocompleta Métrica y Rubro a partir del texto del pedido — solo
+  // mientras esos campos sigan vacíos, para no pisar una elección manual
+  // del usuario. Sin match de keywords, el campo queda vacío (el usuario
+  // elige a mano) — nunca se asume una categoría/rubro sin señal real.
   const updatePedidoTexto = (index, texto) => {
-    setPedidos((prev) => prev.map((p, i) => (i === index ? { ...p, texto } : p)));
+    setPedidos((prev) => prev.map((p, i) => {
+      if (i !== index) return p;
+      const next = { ...p, texto };
+      if (!p.categoria) {
+        const sugerida = classifyTextStrict(texto);
+        if (sugerida) next.categoria = sugerida.key;
+      }
+      if (!p.rubro) {
+        const sugerido = classifyRubro(texto);
+        if (sugerido) next.rubro = sugerido.value;
+      }
+      return next;
+    }));
   };
 
   const updatePedidoCategoria = (index, categoria) => {
     setPedidos((prev) => prev.map((p, i) => (i === index ? { ...p, categoria } : p)));
+  };
+
+  const updatePedidoRubro = (index, rubro) => {
+    setPedidos((prev) => prev.map((p, i) => (i === index ? { ...p, rubro } : p)));
   };
 
   const addPedido = () => {
@@ -74,7 +95,6 @@ export function useSetterForm() {
     setPlatformValues([]);
     setTerritorio('');
     setRangoEtario('');
-    setRubro('');
     setPedidos([{ ...EMPTY_PEDIDO }]);
     setNsm('');
   };
@@ -85,8 +105,8 @@ export function useSetterForm() {
     periodMode, setPeriodMode, lapsoValue, setLapsoValue, fechaInicio, setFechaInicio, fechaFin, setFechaFin,
     presupuesto, setPresupuesto, moneda, setMoneda,
     platformValues, togglePlatform,
-    territorio, setTerritorio, rangoEtario, setRangoEtario, rubro, setRubro,
-    pedidos, updatePedidoTexto, updatePedidoCategoria, addPedido, removePedido, maxPedidos: MAX_PEDIDOS,
+    territorio, setTerritorio, rangoEtario, setRangoEtario,
+    pedidos, updatePedidoTexto, updatePedidoCategoria, updatePedidoRubro, addPedido, removePedido, maxPedidos: MAX_PEDIDOS,
     pedidosIncompletos,
     nsm, setNsm,
     isValid,

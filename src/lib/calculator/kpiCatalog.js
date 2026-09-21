@@ -121,10 +121,18 @@ export function findCategory(key) {
 }
 
 export function classifyText(text) {
+  return classifyTextStrict(text) || DEFAULT_CATEGORY;
+}
+
+// Como classifyText(), pero sin el fallback a la categoría default — para
+// autocompletar el select de Métrica mientras el usuario escribe el pedido:
+// si ninguna keyword matcheó, mejor dejar el campo vacío (que el usuario
+// elija) que asumir "Conversión" sin ninguna señal real en el texto.
+export function classifyTextStrict(text) {
   for (const category of CATEGORIES) {
     if (containsAny(text, category.keywords)) return category;
   }
-  return DEFAULT_CATEGORY;
+  return null;
 }
 
 export function fuenteDeVerdad(plataformaLabels) {

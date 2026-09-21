@@ -19,7 +19,6 @@ function formToFields(form) {
     plataformas: form.platformValues,
     territorio: form.territorio,
     rangoEtario: form.rangoEtario,
-    rubro: form.rubro,
     pedidos: form.pedidos,
     nsm: form.nsm,
   };

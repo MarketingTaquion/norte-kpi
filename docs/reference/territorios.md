@@ -30,6 +30,26 @@ superior adicional: `min(proyección_por_presupuesto, techo_poblacional)`.
 la penetración de plataforma.** Si el equipo comercial junta datos reales
 (ej. tasa de interés medida en campañas ya corridas), actualizar
 `rubros.js` — es el único de los cuatro data files sin respaldo externo.
+`rubros.js` también trae `pctNominizado` por rubro (ver [Desglose
+anonimizado/nominizado](#desglose-anonimizado--nominizado) más abajo) — misma
+solidez baja, mismo aviso.
+
+## Rubro: por pedido, no global — con autocompletado
+
+A diferencia de `territorio` y `rangoEtario` (declarados una vez para toda
+la estimación, en el paso Territorio del wizard), **el rubro es un campo
+por pedido** — cada fila de "¿Qué pidió el cliente?" tiene su propio select
+de Rubro. Tiene sentido: dos pedidos de la misma estimación pueden ser de
+intereses distintos (ej. "más leads de gastronomía" y "más seguidores para
+indumentaria"), y un solo rubro global no podría representar ambos.
+
+Al escribir el texto del pedido, `useSetterForm.js` autocompleta tanto la
+Métrica (`classifyTextStrict()` en `kpiCatalog.js`) como el Rubro
+(`classifyRubro()` en `rubros.js`) contra las `keywords` de cada categoría/
+rubro — **solo mientras el campo siga vacío** (no pisa una elección manual
+ya hecha), y **sin fallback**: si ninguna keyword matcheó, el campo queda
+vacío en vez de asumir un valor sin señal real en el texto. Si se agrega un
+rubro nuevo a `rubros.js`, agregarle también su lista de `keywords`.
 
 ## Localidades incluidas y las que no
 
@@ -88,7 +108,30 @@ recorta contra el **mayor** techo entre las plataformas seleccionadas — un
 límite conservador que evita contar audiencia superpuesta entre canales sin
 tener que modelar esa superposición con precisión.
 
+## Desglose anonimizado / nominizado
+
+Cada `kpi` de tipo alcance/seguidores también trae `desglose_identidad:
+{ anonimizado, nominizado }` (o `null` sin rubro declarado, porque sin rubro
+no hay base para estimar el split). Divide el `proyeccion_max` ya recortado
+en dos:
+
+- **`nominizado`**: cuánto de esa audiencia es razonable esperar que deje un
+  dato identificable (formulario, CRM, opt-in) — `pctNominizado` del rubro.
+- **`anonimizado`**: el resto — exposición vía pauta/alcance sin retorno
+  identificable.
+
+Ver `desgloseIdentidad()` en `territorio.js`. Igual que el factor de rubro,
+`pctNominizado` es una estimación interna sin fuente externa — rubros de
+intención/ticket alto (inmobiliario, servicios B2B) tienen un
+`pctNominizado` mayor que consumo masivo de bajo compromiso (gastronomía,
+entretenimiento), por juicio de la agencia, no por dato medido. Este campo
+es conceptualmente independiente de los tipos de cliente "Nominizado" /
+"Anonimizado" que ya existían en `src/data/clients.js` (esos describen si
+los datos de un cliente de Comunidad identifican personas o no) — el
+desglose acá aplica a cualquier cliente, es sobre la proyección, no sobre
+el cliente en sí.
+
 ## Ver también
 
 - [reference: calculadora](calculator.md) — categorías, benchmarks, `modo` de proyección.
-- [reference: schema de salida](output-schema.md) — shape completo de `kpis[].por_plataforma`.
+- [reference: schema de salida](output-schema.md) — shape completo de `kpis[].por_plataforma` y `desglose_identidad`.

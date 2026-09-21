@@ -679,15 +679,43 @@ input:focus, textarea:focus, select:focus {
   margin-top: 2px;
 }
 
+.kpi-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
 .kpi-card-territorio {
   display: inline-block;
-  margin-top: 10px;
   font-size: 11px;
   font-weight: var(--tq-weight-semibold);
   color: var(--tq-text-muted);
   background: var(--tq-surface-subtle);
   border-radius: var(--tq-radius-sm);
   padding: 3px 9px;
+}
+
+.kpi-card-identidad {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: var(--tq-border-hairline) solid var(--tq-line);
+}
+
+.kpi-card-identidad-valor {
+  font-size: 20px;
+  font-weight: var(--tq-weight-black);
+  margin-top: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+.kpi-card-identidad-nota {
+  font-size: 11px;
+  color: var(--tq-text-faint);
+  margin-top: 2px;
 }
 
 .kpi-card-plataformas {

@@ -8,7 +8,8 @@ import { LAPSOS } from '../../data/lapsos.js';
 import { taxCalc } from '../../utils/tax.js';
 import { classifyText, findCategory, fuenteDeVerdad } from './kpiCatalog.js';
 import { BENCHMARKS, midpoint } from './benchmarks.js';
-import { findTerritorio, findRangoEtario, findRubro, techoPoblacional } from './territorio.js';
+import { findRubro } from '../../data/rubros.js';
+import { findTerritorio, findRangoEtario, techoPoblacional, desgloseIdentidad } from './territorio.js';
 
 const ALL_PLATFORMS = PLATFORM_GROUPS.flatMap((g) => g.items);
 const PACING_BLOQUES = ['25%', '50%', '75%', '100%'];
@@ -31,12 +32,13 @@ function round(n) {
   return Math.round(n);
 }
 
-// El wizard siempre manda `{ texto, categoria }` (select obligatorio) — se
-// acepta también un string plano para integraciones de la API pública que
-// todavía no mandan `categoria`, con classifyText() como fallback.
+// El wizard siempre manda `{ texto, categoria, rubro }` (categoria
+// obligatoria, rubro opcional) — se acepta también un string plano para
+// integraciones de la API pública que todavía no mandan esos campos, con
+// classifyText() como fallback de categoria y sin rubro.
 function normalizePedido(p) {
-  if (typeof p === 'string') return { texto: p, categoria: '' };
-  return { texto: p?.texto || '', categoria: p?.categoria || '' };
+  if (typeof p === 'string') return { texto: p, categoria: '', rubro: '' };
+  return { texto: p?.texto || '', categoria: p?.categoria || '', rubro: p?.rubro || '' };
 }
 
 // Calcula la proyección de un KPI según su "modo" — la parte que reemplaza
@@ -148,7 +150,7 @@ function armarPacing(kpis, dias) {
 export function calculateSetterResult(fields) {
   const {
     etapas = [], periodo, presupuesto, moneda = 'ARS', plataformas = [], pedidos = [], nsm,
-    territorio, rangoEtario, rubro,
+    territorio, rangoEtario,
   } = fields || {};
 
   const etapaLabels = resolveLabels(STAGES, etapas);
@@ -167,10 +169,10 @@ export function calculateSetterResult(fields) {
 
   const territorioObj = findTerritorio(territorio);
   const rangoEtarioObj = findRangoEtario(rangoEtario);
-  const rubroObj = findRubro(rubro);
 
   const kpis = pedidosValidos.map((pedido) => {
     const category = findCategory(pedido.categoria) || classifyText(pedido.texto);
+    const rubroObj = findRubro(pedido.rubro);
     const sop = setupForzado && category.sop !== 'SOP Ignite' ? 'SOP Setup' : category.sop;
     const alcancePersonas = esAlcancePersonas(category);
     let { min, max, meta } = proyectarKpi(category, netoPorPedido);
@@ -220,7 +222,9 @@ export function calculateSetterResult(fields) {
       proyeccion_max: max,
       agresividad_pct: agresividadPct(category),
       territorio: territorioObj?.label || null,
+      rubro: rubroObj?.label || null,
       por_plataforma: porPlataforma,
+      desglose_identidad: alcancePersonas ? desgloseIdentidad(max, rubroObj) : null,
     };
   });
 

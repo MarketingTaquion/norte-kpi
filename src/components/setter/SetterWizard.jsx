@@ -78,7 +78,7 @@ export default function SetterWizard({ form, onComplete, loading }) {
   const categoriaLabel = (key) => CATEGORY_OPTIONS.find((c) => c.value === key)?.label || '—';
   const territorioLabel = TERRITORIOS.find((t) => t.value === form.territorio)?.label;
   const rangoEtarioLabel = RANGOS_ETARIOS.find((r) => r.value === form.rangoEtario)?.label;
-  const rubroLabel = RUBROS.find((r) => r.value === form.rubro)?.label;
+  const rubroLabel = (key) => RUBROS.find((r) => r.value === key)?.label;
 
   return (
     <div className="wizard-shell">
@@ -222,25 +222,14 @@ export default function SetterWizard({ form, onComplete, loading }) {
                 ))}
               </select>
             </div>
-            <div className="budget-row" style={{ marginTop: 12 }}>
-              <div className="field" style={{ marginBottom: 0 }}>
-                <label className="field-label">Rango etario objetivo</label>
-                <select value={form.rangoEtario} onChange={(e) => form.setRangoEtario(e.target.value)}>
-                  <option value="">Toda la población…</option>
-                  {RANGOS_ETARIOS.map((r) => (
-                    <option key={r.value} value={r.value}>{r.label}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="field" style={{ marginBottom: 0 }}>
-                <label className="field-label">Rubro / interés</label>
-                <select value={form.rubro} onChange={(e) => form.setRubro(e.target.value)}>
-                  <option value="">Sin acotar…</option>
-                  {RUBROS.map((r) => (
-                    <option key={r.value} value={r.value}>{r.label}</option>
-                  ))}
-                </select>
-              </div>
+            <div className="field" style={{ marginTop: 12, marginBottom: 0 }}>
+              <label className="field-label">Rango etario objetivo</label>
+              <select value={form.rangoEtario} onChange={(e) => form.setRangoEtario(e.target.value)}>
+                <option value="">Toda la población…</option>
+                {RANGOS_ETARIOS.map((r) => (
+                  <option key={r.value} value={r.value}>{r.label}</option>
+                ))}
+              </select>
             </div>
           </div>
         )}
@@ -249,7 +238,8 @@ export default function SetterWizard({ form, onComplete, loading }) {
           <div>
             <p className="wizard-step-hint" style={{ marginTop: 0, marginBottom: 14 }}>
               Cada pedido necesita su métrica — es lo que define la fórmula y el
-              benchmark que se usan para proyectarlo.
+              benchmark que se usan para proyectarlo. Al escribir, la Métrica y
+              el Rubro se sugieren solos (se pueden cambiar a mano).
             </p>
             {form.pedidos.map((pedido, i) => (
               <div key={i} style={{ marginBottom: 12 }}>
@@ -264,15 +254,28 @@ export default function SetterWizard({ form, onComplete, loading }) {
                     <button type="button" className="icon-btn" onClick={() => form.removePedido(i)}>×</button>
                   ) : null}
                 </div>
-                <select
-                  value={pedido.categoria}
-                  onChange={(e) => form.updatePedidoCategoria(i, e.target.value)}
-                >
-                  <option value="">Métrica del pedido {i + 1}…</option>
-                  {CATEGORY_OPTIONS.map((c) => (
-                    <option key={c.value} value={c.value}>{c.label}</option>
-                  ))}
-                </select>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <select
+                    style={{ flex: 1 }}
+                    value={pedido.categoria}
+                    onChange={(e) => form.updatePedidoCategoria(i, e.target.value)}
+                  >
+                    <option value="">Métrica del pedido {i + 1}…</option>
+                    {CATEGORY_OPTIONS.map((c) => (
+                      <option key={c.value} value={c.value}>{c.label}</option>
+                    ))}
+                  </select>
+                  <select
+                    style={{ flex: 1 }}
+                    value={pedido.rubro}
+                    onChange={(e) => form.updatePedidoRubro(i, e.target.value)}
+                  >
+                    <option value="">Rubro (opcional)…</option>
+                    {RUBROS.map((r) => (
+                      <option key={r.value} value={r.value}>{r.label}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
             ))}
             {form.pedidos.length < form.maxPedidos ? (
@@ -320,8 +323,8 @@ export default function SetterWizard({ form, onComplete, loading }) {
               </div>
               {territorioLabel ? (
                 <div className="review-row">
-                  <span className="r-label">Rango etario / rubro</span>
-                  <span className="r-value">{rangoEtarioLabel || 'Toda la población'} · {rubroLabel || 'Sin acotar'}</span>
+                  <span className="r-label">Rango etario</span>
+                  <span className="r-value">{rangoEtarioLabel || 'Toda la población'}</span>
                 </div>
               ) : null}
               <div className="review-row">
@@ -332,7 +335,10 @@ export default function SetterWizard({ form, onComplete, loading }) {
             <div className="section-heading">Pedidos a traducir</div>
             <ul className="list-plain">
               {pedidosValidos.map((p, i) => (
-                <li key={i}>{p.texto} — <strong>{categoriaLabel(p.categoria)}</strong></li>
+                <li key={i}>
+                  {p.texto} — <strong>{categoriaLabel(p.categoria)}</strong>
+                  {p.rubro ? ` · ${rubroLabel(p.rubro)}` : ''}
+                </li>
               ))}
             </ul>
           </div>
