@@ -148,17 +148,40 @@ recorta contra el **mayor** techo entre las plataformas seleccionadas — un
 límite conservador que evita contar audiencia superpuesta entre canales sin
 tener que modelar esa superposición con precisión.
 
+## Comunidad: un escalón más allá del SOM
+
+El embudo no termina en el SOM. Para clientes que corren el servicio de
+Comunidad de Taquion (un flujo de ManyChat que arma un grupo de WhatsApp —
+el mismo proceso para todos los clientes), tiene sentido preguntar: de toda
+la gente alcanzable por pauta (SOM), ¿cuántos se terminan uniendo a ese
+grupo? Eso es `comunidad` — `som × TASA_CAPTACION_COMUNIDAD`
+(`src/data/comunidad.js`).
+
+Es un escalón de naturaleza distinta al resto del embudo: TAM/SAM/SOM miden
+techo de audiencia (¿cuánta gente existe/es alcanzable?), Comunidad mide
+conversión/comportamiento (¿cuántos de los alcanzables dan el paso de
+unirse?) — dos fuentes de incertidumbre distintas, por eso es su propio
+escalón y no solo un recorte más del mismo tipo. Hoy `TASA_CAPTACION_COMUNIDAD`
+es una sola tasa **global**, no por rubro: al momento de este cálculo,
+Taquion corrió un solo flow de ManyChat — no hay muestra para diferenciar
+por rubro sin inventar precisión falsa. El plan es calibrarla (y
+eventualmente partirla por rubro, con un piso mínimo de campañas reales por
+rubro) a través del mismo loop de calibración de la Fase 5 del plan de
+TAM/SAM/SOM — ver el comentario de `src/data/comunidad.js`.
+
 ## Desglose anonimizado / nominizado
 
 Cada `kpi` de tipo alcance/seguidores también trae `desglose_identidad:
-{ anonimizado, nominizado }` (o `null` sin rubro declarado, porque sin rubro
-no hay base para estimar el split). Divide el `proyeccion_max` ya recortado
-en dos:
+{ anonimizado, nominizado }` (o `null` sin `comunidad.max`). Divide el
+`comunidad.max` en dos — **no** el `som.max`: el split "¿dejó un dato
+identificable o no?" solo tiene sentido una vez que la persona ya es
+miembro del grupo de WhatsApp, no antes.
 
-- **`nominizado`**: cuánto de esa audiencia es razonable esperar que deje un
-  dato identificable (formulario, CRM, opt-in) — `pctNominizado` del rubro.
-- **`anonimizado`**: el resto — exposición vía pauta/alcance sin retorno
-  identificable.
+- **`nominizado`**: cuántos de esos miembros es razonable esperar que se
+  identifiquen (formulario, CRM, opt-in del propio flujo) — `pctNominizado`
+  del rubro.
+- **`anonimizado`**: el resto — están en el grupo, pero sin dato
+  identificable más allá del teléfono.
 
 Ver `desgloseIdentidad()` en `territorio.js`. Igual que el factor de rubro,
 `pctNominizado` es una estimación interna sin fuente externa — rubros de
@@ -184,4 +207,4 @@ el resultado real de una campaña ya corrida.
 ## Ver también
 
 - [reference: calculadora](calculator.md) — categorías, benchmarks, `modo` de proyección.
-- [reference: schema de salida](output-schema.md) — shape completo de `kpis[].por_plataforma`, `desglose_identidad` y `tam`/`sam`/`som`/`confianza`.
+- [reference: schema de salida](output-schema.md) — shape completo de `kpis[].por_plataforma`, `desglose_identidad` y `tam`/`sam`/`som`/`comunidad`/`confianza`.

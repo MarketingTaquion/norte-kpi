@@ -11,6 +11,7 @@ import { BENCHMARKS, midpoint } from './benchmarks.js';
 import { findRubro } from '../../data/rubros.js';
 import { findTerritorio, findRangoEtario, techoPoblacional, tamNacional, desgloseIdentidad } from './territorio.js';
 import { tagConfianza, ampliarRangoSiInterna } from './confianza.js';
+import { TASA_CAPTACION_COMUNIDAD } from '../../data/comunidad.js';
 
 const ALL_PLATFORMS = PLATFORM_GROUPS.flatMap((g) => g.items);
 const PACING_BLOQUES = ['25%', '50%', '75%', '100%'];
@@ -230,7 +231,6 @@ export function calculateSetterResult(fields) {
     const confianzaSam = sam != null ? tagConfianza(chainKey) : null;
     const confianzaSom = tagConfianza(wasCapped ? chainKey : 'ESTIMACION_INTERNA');
 
-    const desgloseIdentidadPreWidening = alcancePersonas ? desgloseIdentidad(max, rubroObj) : null;
     const { min: somMinAmpliado, max: somMaxAmpliado } = ampliarRangoSiInterna(min, max, confianzaSom);
     // El ensanchado por confianza nunca puede superar el techo poblacional
     // (SAM) — ensanchar hacia arriba de esa cifra rompería el embudo
@@ -238,6 +238,20 @@ export function calculateSetterResult(fields) {
     // inalcanzable, justo lo que este indicador existe para evitar.
     const somMax = sam != null ? Math.min(somMaxAmpliado, sam) : somMaxAmpliado;
     const somMin = Math.min(somMinAmpliado, somMax);
+
+    // Comunidad: de todo el SOM (gente alcanzable por pauta), cuántos se
+    // terminan uniendo al grupo de WhatsApp que arma el flujo de ManyChat
+    // de ese cliente — un escalón más del embudo, distinto en naturaleza a
+    // TAM/SAM/SOM (mide conversión/comportamiento, no techo de audiencia).
+    // Siempre 'interna': no hay fuente externa para esta tasa todavía — ver
+    // src/data/comunidad.js. El desglose anonimizado/nominizado (¿el
+    // miembro dejó un dato identificable, ej. CRM, o no?) solo tiene
+    // sentido una vez que la persona ya es miembro del grupo, por eso
+    // cuelga de Comunidad y no del SOM.
+    const comunidadMin = alcancePersonas ? Math.round(somMin * TASA_CAPTACION_COMUNIDAD) : null;
+    const comunidadMax = alcancePersonas ? Math.round(somMax * TASA_CAPTACION_COMUNIDAD) : null;
+    const confianzaComunidad = alcancePersonas ? tagConfianza('ESTIMACION_INTERNA') : null;
+    const desgloseIdentidadComunidad = comunidadMax != null ? desgloseIdentidad(comunidadMax, rubroObj) : null;
 
     const texto = pedido.texto;
     return {
@@ -253,11 +267,12 @@ export function calculateSetterResult(fields) {
       territorio: territorioObj?.label || null,
       rubro: rubroObj?.label || null,
       por_plataforma: porPlataforma,
-      desglose_identidad: desgloseIdentidadPreWidening,
+      desglose_identidad: desgloseIdentidadComunidad,
       tam,
       sam,
       som: { min: somMin, max: somMax },
-      confianza: { tam: confianzaTam, sam: confianzaSam, som: confianzaSom },
+      comunidad: comunidadMin != null ? { min: comunidadMin, max: comunidadMax } : null,
+      confianza: { tam: confianzaTam, sam: confianzaSam, som: confianzaSom, comunidad: confianzaComunidad },
     };
   });
 

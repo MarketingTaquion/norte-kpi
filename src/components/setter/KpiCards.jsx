@@ -67,20 +67,36 @@ export default function KpiCards({ kpis }) {
                 <div className="kpi-card-col-label">Estimado (SOM)</div>
                 <div className="kpi-card-funnel-valor">{k.som.min.toLocaleString('es-AR')}–{k.som.max.toLocaleString('es-AR')}</div>
               </div>
+              {k.comunidad ? (
+                <>
+                  <span className="kpi-card-funnel-arrow">→</span>
+                  <div className="kpi-card-funnel-item kpi-card-funnel-item-comunidad">
+                    <div className="kpi-card-col-label">Comunidad</div>
+                    <div className="kpi-card-funnel-valor">{k.comunidad.min.toLocaleString('es-AR')}–{k.comunidad.max.toLocaleString('es-AR')}</div>
+                    <div className="kpi-card-funnel-nota">Grupo de WhatsApp vía ManyChat</div>
+                  </div>
+                </>
+              ) : null}
+            </div>
+          ) : null}
+
+          {k.comunidad && k.confianza?.comunidad ? (
+            <div className={`kpi-card-confianza kpi-card-confianza-${k.confianza.comunidad.nivel} kpi-card-confianza-comunidad`}>
+              Comunidad: {k.confianza.comunidad.label}
             </div>
           ) : null}
 
           {k.desglose_identidad ? (
             <div className="kpi-card-identidad">
               <div className="kpi-card-identidad-item">
-                <div className="kpi-card-col-label">Alcanzable anónimo</div>
+                <div className="kpi-card-col-label">Miembros anonimizados</div>
                 <div className="kpi-card-identidad-valor">{k.desglose_identidad.anonimizado.toLocaleString('es-AR')}</div>
-                <div className="kpi-card-identidad-nota">Exposición vía pauta/alcance, sin retorno identificable</div>
+                <div className="kpi-card-identidad-nota">En el grupo, sin dato identificable más allá del teléfono</div>
               </div>
               <div className="kpi-card-identidad-item">
-                <div className="kpi-card-col-label">Con identidad conocida</div>
+                <div className="kpi-card-col-label">Miembros nominizados</div>
                 <div className="kpi-card-identidad-valor">{k.desglose_identidad.nominizado.toLocaleString('es-AR')}</div>
-                <div className="kpi-card-identidad-nota">Estimado — deja un dato identificable (CRM, opt-in)</div>
+                <div className="kpi-card-identidad-nota">Se identificaron — CRM, formulario del flujo</div>
               </div>
             </div>
           ) : null}

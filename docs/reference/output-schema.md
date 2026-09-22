@@ -40,10 +40,12 @@ consumidores.
       "tam": "number o null — universo nacional para ese pedido (sin recorte geográfico)",
       "sam": "number o null — techo poblacional de la localidad declarada (null sin territorio)",
       "som": { "min": 0, "max": 0 },
+      "comunidad": { "min": 0, "max": 0 },
       "confianza": {
         "tam": { "nivel": "alta | interna", "fuente": "string", "label": "string" },
         "sam": { "nivel": "alta | interna", "fuente": "string", "label": "string" },
-        "som": { "nivel": "alta | interna", "fuente": "string", "label": "string" }
+        "som": { "nivel": "alta | interna", "fuente": "string", "label": "string" },
+        "comunidad": { "nivel": "alta | interna", "fuente": "string", "label": "string" }
       }
     }
   ],
@@ -74,18 +76,18 @@ valor.
 `territorio` es `null` cuando no se declaró localidad; `rubro` es `null`
 cuando ESE pedido no declaró rubro (es un campo por pedido, no global);
 `por_plataforma` es `null` sin plataformas seleccionadas; `desglose_identidad`
-es `null` sin rubro declarado (sin rubro no hay base para estimar el split
-anonimizado/nominizado). Ver [reference: territorios](territorios.md) para
-de dónde sale el techo poblacional que recorta `alcance`/`seguidores`, qué
-plataformas tienen techo aplicable, por qué `por_plataforma` existe (una
-fila por plataforma seleccionada, con el neto dividido en partes iguales
-entre ellas), y qué representa `desglose_identidad`.
+es `null` sin `comunidad` (sin `comunidad.max` no hay base para estimar el
+split anonimizado/nominizado — ver más abajo). Ver [reference:
+territorios](territorios.md) para de dónde sale el techo poblacional que
+recorta `alcance`/`seguidores`, qué plataformas tienen techo aplicable, y
+por qué `por_plataforma` existe (una fila por plataforma seleccionada, con
+el neto dividido en partes iguales entre ellas).
 
-### `tam` / `sam` / `som` / `confianza`
+### `tam` / `sam` / `som` / `comunidad` / `confianza`
 
 Solo se calculan para categorías de tipo alcance/audiencia (ver
 `esAlcancePersonas()` en `setterCalculator.js`) — en el resto son `null`.
-Forman un embudo TAM → SAM → SOM:
+Forman un embudo TAM → SAM → SOM → Comunidad:
 
 - **`tam`** (Total Addressable Market): universo nacional de esa
   plataforma/rango etario/rubro, sin recortar por territorio — `null` si
@@ -99,16 +101,35 @@ Forman un embudo TAM → SAM → SOM:
   baja confianza (ver abajo) puede llevar el número más allá del techo
   demográfico real, porque eso rompería el propósito del embudo (evitar que
   comercial venda algo inalcanzable).
-- **`confianza`**: un `{ nivel, fuente, label }` por cada uno de los tres.
-  `nivel: 'alta'` = cadena poblacional con fuente externa citable (INDEC +
-  DataReportal); `nivel: 'interna'` = el número depende del factor de rubro
-  (`rubros.js`), que no tiene fuente externa — ver [reference:
+- **`comunidad`**: `{ min, max }`, un escalón más allá del SOM — de toda la
+  gente alcanzable por pauta (SOM), cuánta se termina uniendo al grupo de
+  WhatsApp que arma el flujo de ManyChat de ese cliente (servicio real de
+  Taquion, el mismo proceso para todos los clientes). Es
+  `som × TASA_CAPTACION_COMUNIDAD` (`src/data/comunidad.js`) — una tasa
+  única global, no por rubro todavía, porque no hay historial real
+  suficiente para calibrarla por rubro (ver el comentario de ese archivo).
+  Mide conversión/comportamiento, no techo de audiencia — es una fuente de
+  incertidumbre distinta a la del SOM, por eso es un escalón separado y no
+  solo un recorte más del mismo tipo.
+- **`confianza`**: un `{ nivel, fuente, label }` por cada uno de los
+  cuatro. `nivel: 'alta'` = cadena poblacional con fuente externa citable
+  (INDEC + DataReportal); `nivel: 'interna'` = el número depende de un
+  factor sin fuente externa (rubro para tam/sam/som, la tasa de captación
+  para comunidad) — ver [reference:
   territorios](territorios.md#de-dónde-sale-cada-número-y-qué-tan-sólido-es).
-  Cuando `som.confianza.nivel === 'interna'`, el rango `som` se ensancha
-  ±15% adicional respecto al cálculo crudo (`ampliarRangoSiInterna()` en
+  `comunidad.confianza` es **siempre** `'interna'`. Cuando
+  `som.confianza.nivel === 'interna'`, el rango `som` se ensancha ±15%
+  adicional respecto al cálculo crudo (`ampliarRangoSiInterna()` en
   `confianza.js`) — para que un rango angosto nunca aparezca en una pieza
   sin fuente sólida detrás — pero siempre recortado contra `sam` como se
   explicó arriba.
+
+`desglose_identidad` (`{ anonimizado, nominizado }`) cuelga de
+`comunidad.max`, no de `som.max` — el split "¿dejó un dato identificable o
+no?" solo tiene sentido una vez que la persona ya es miembro del grupo de
+WhatsApp (`desgloseIdentidad()` en `territorio.js`, reutilizando
+`rubro.pctNominizado`); antes de esa etapa el SOM es solo gente alcanzable
+por pauta, sin ninguna noción de identidad.
 
 ## Evaluador — `calculateEvaluatorResult()`
 

@@ -746,6 +746,29 @@ input:focus, textarea:focus, select:focus {
   flex: 0 0 auto;
 }
 
+.kpi-card-funnel-item-comunidad {
+  background: var(--tq-gradiente-comunidad);
+  border-radius: var(--tq-radius-sm);
+  padding: 8px 10px;
+}
+
+.kpi-card-funnel-item-comunidad .kpi-card-col-label,
+.kpi-card-funnel-item-comunidad .kpi-card-funnel-valor {
+  color: var(--tq-blanco);
+}
+
+.kpi-card-funnel-nota {
+  font-size: 9px;
+  color: var(--tq-blanco);
+  opacity: 0.85;
+  margin-top: 2px;
+}
+
+.kpi-card-confianza-comunidad {
+  display: table;
+  margin: 10px auto 0;
+}
+
 .kpi-card-disclaimer {
   font-size: 11px;
   color: var(--tq-text-faint);
