@@ -30,14 +30,18 @@ export default function KpiCards({ kpis }) {
             <div>
               <div className="kpi-card-col-label">Proyección</div>
               <div className="kpi-card-proyeccion">{k.proyeccion_min} — {k.proyeccion_max}</div>
-              <RangeMeter min={k.proyeccion_min} max={k.proyeccion_max} />
-              <div className="range-meter-labels">
-                <span>min</span><span>max</span>
-              </div>
-              {k.confianza?.som ? (
-                <div className={`kpi-card-confianza kpi-card-confianza-${k.confianza.som.nivel}`}>
-                  {k.confianza.som.label}
-                </div>
+              {k.tam == null && k.sam == null ? (
+                <>
+                  <RangeMeter min={k.proyeccion_min} max={k.proyeccion_max} />
+                  <div className="range-meter-labels">
+                    <span>min</span><span>max</span>
+                  </div>
+                  {k.confianza?.som ? (
+                    <div className={`kpi-card-confianza kpi-card-confianza-${k.confianza.som.nivel}`}>
+                      {k.confianza.som.label}
+                    </div>
+                  ) : null}
+                </>
               ) : null}
             </div>
             <div className="kpi-card-gauge-col">
@@ -80,9 +84,18 @@ export default function KpiCards({ kpis }) {
             </div>
           ) : null}
 
-          {k.comunidad && k.confianza?.comunidad ? (
-            <div className={`kpi-card-confianza kpi-card-confianza-${k.confianza.comunidad.nivel} kpi-card-confianza-comunidad`}>
-              Comunidad: {k.confianza.comunidad.label}
+          {k.confianza?.som || k.confianza?.comunidad ? (
+            <div className="kpi-card-confianza-row">
+              {k.confianza?.som ? (
+                <div className={`kpi-card-confianza kpi-card-confianza-${k.confianza.som.nivel}`}>
+                  SOM: {k.confianza.som.label}
+                </div>
+              ) : null}
+              {k.comunidad && k.confianza?.comunidad ? (
+                <div className={`kpi-card-confianza kpi-card-confianza-${k.confianza.comunidad.nivel}`}>
+                  Comunidad: {k.confianza.comunidad.label}
+                </div>
+              ) : null}
             </div>
           ) : null}
 

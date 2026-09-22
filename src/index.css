@@ -764,9 +764,16 @@ input:focus, textarea:focus, select:focus {
   margin-top: 2px;
 }
 
-.kpi-card-confianza-comunidad {
-  display: table;
-  margin: 10px auto 0;
+.kpi-card-confianza-row {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.kpi-card-confianza-row .kpi-card-confianza {
+  margin-top: 0;
 }
 
 .kpi-card-disclaimer {
