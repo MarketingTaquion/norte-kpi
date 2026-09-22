@@ -1,19 +1,19 @@
 # API pública
 
-Dos endpoints para que herramientas externas (n8n, un CRM, un backend propio)
-generen una estimación o auditen un KPI sin pasar por el wizard del browser.
-Corren la misma [calculadora determinística](calculator.md) que usa el
-browser — nada de IA, nada de red hacia un tercero. Son públicos en el
-sentido de "alcanzables desde internet", por eso requieren autenticación.
+Un endpoint para que herramientas externas (n8n, un CRM, un backend propio)
+generen una estimación sin pasar por el wizard del browser. Corre la misma
+[calculadora determinística](calculator.md) que usa el browser — nada de IA,
+nada de red hacia un tercero. Es público en el sentido de "alcanzable desde
+internet", por eso requiere autenticación.
 
-Cada endpoint tiene una implementación por plataforma de deploy, con
+El endpoint tiene una implementación por plataforma de deploy, con
 **contrato idéntico** (mismo request, misma response, mismos códigos de
 error) — la diferencia es solo dónde vive el código:
 
-| Plataforma | `kpi-estimate` | `kpi-evaluate` |
-|---|---|---|
-| Vercel (principal) | [`api/kpi-estimate.js`](../../api/kpi-estimate.js) | [`api/kpi-evaluate.js`](../../api/kpi-evaluate.js) |
-| Netlify (secundaria) | [`netlify/functions/kpi-estimate.js`](../../netlify/functions/kpi-estimate.js) | [`netlify/functions/kpi-evaluate.js`](../../netlify/functions/kpi-evaluate.js) |
+| Plataforma | `kpi-estimate` |
+|---|---|
+| Vercel (principal) | [`api/kpi-estimate.js`](../../api/kpi-estimate.js) |
+| Netlify (secundaria) | [`netlify/functions/kpi-estimate.js`](../../netlify/functions/kpi-estimate.js) |
 
 Ambas comparten la misma lógica de negocio desde
 [`src/lib/calculator/`](../../src/lib/calculator/) — nada de esto está
@@ -100,62 +100,6 @@ El mismo JSON que consume `SetterResult.jsx` — ver
 | `400` | Body no es JSON válido |
 | `422` | Falta `cliente` o `pedidos` (o `pedidos` está vacío) |
 | `500` | Excepción no esperada del cálculo (ej. un `periodo` malformado) — no debería pasar con input válido |
-
-## `POST /api/kpi-evaluate`
-
-Audita un KPI ya redactado — el mismo resultado que produce el formulario del
-Evaluador.
-
-Función real: [`api/kpi-evaluate.js`](../../api/kpi-evaluate.js) (Vercel) / [`netlify/functions/kpi-evaluate.js`](../../netlify/functions/kpi-evaluate.js) (Netlify).
-Calcula con [`calculateEvaluatorResult()`](../../src/lib/calculator/evaluatorCalculator.js) — ver
-[schema de salida completo](output-schema.md#evaluador--calculateevaluatorresult).
-
-### Solicitud (Request)
-
-```
-POST /api/kpi-evaluate
-Content-Type: application/json
-X-Api-Key: <NORTE_API_KEY>
-```
-
-| Campo | Tipo | Obligatorio | Notas |
-|---|---|---|---|
-| `accion` | `string` | **Sí** | El verbo del KPI (Captar, Lograr, Reducir, Mantener) |
-| `indicador` | `string` | **Sí** | La métrica con número concreto (ej. "500 leads") |
-| `segmento` | `string` | **Sí** | A quién apunta el KPI |
-| `categoria` | `string` | No (recomendado) | Value de [`CATEGORY_OPTIONS`](calculator.md) (ej. `"leads"`) — el wizard siempre la manda como select obligatorio. Si se omite, se infiere por keywords con `classifyText()` sobre `accion` + `indicador` |
-| `cliente` | `string` | No | Solo contexto, no afecta la lógica de auditoría |
-| `plataformas` | `string[]` | No | Values de [`PLATFORM_GROUPS`](configuration-data.md#srcdataplatformsjs--platform_groups) |
-| `alcanzable` | `string` | No | Evidencia de alcanzabilidad |
-| `periodo` | `{ lapso: string }` \| `{ desde, hasta }` | No | Si se omite, el veredicto puede ser `CONDICIONADO` |
-| `presupuesto` | `number` | No | Bruto. Sin esto, el veredicto no puede ser `RECHAZADO_INVIABILIDAD`. El wizard solo ofrece `5000000`, `10000000` o `12000000` (o vacío) vía [`PRESUPUESTO_OPTIONS`](../../src/data/presupuestos.js) — la API acepta cualquier número positivo |
-| `moneda` | `"ARS"` \| `"USD"` | No | Default `"ARS"` |
-| `cpcCpaRef` / `cpmRef` | `string` | No | Datos históricos para calibrar viabilidad |
-| `contexto` | `string` | No | Estacionalidad, competencia, restricciones |
-
-Ejemplo:
-
-```json
-{
-  "accion": "Captar",
-  "indicador": "500 leads calificados",
-  "segmento": "Dueños de PyMEs, 35-55 años, CABA",
-  "categoria": "leads",
-  "periodo": { "lapso": "mes-1" },
-  "presupuesto": 1000000,
-  "plataformas": ["meta-ads"]
-}
-```
-
-### Respuesta (Response) `200`
-
-El mismo JSON que consume `EvaluatorResult.jsx` — ver
-[schema completo](output-schema.md#evaluador--calculateevaluatorresult).
-
-### Errores
-
-Mismos códigos que `/api/kpi-estimate`, salvo el `422`: acá dispara si falta
-`accion`, `indicador` o `segmento`.
 
 ## Ver también
 

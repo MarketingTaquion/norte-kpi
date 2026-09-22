@@ -1,7 +1,7 @@
 # Datos de configuración
 
-Cuatro archivos en `src/data/` alimentan las opciones del wizard y del
-formulario del Evaluador. Son arrays estáticos en JS, sin backend ni base de
+Cuatro archivos en `src/data/` alimentan las opciones del wizard del
+Seteador. Son arrays estáticos en JS, sin backend ni base de
 datos detrás — editarlos y redeployar es el único mecanismo para cambiarlos.
 
 ## `src/data/clients.js` — `DEFAULT_CLIENTS`
@@ -9,7 +9,7 @@ datos detrás — editarlos y redeployar es el único mecanismo para cambiarlos.
 Lista base de clientes. Cada item: `{ value, label, description }`.
 
 El usuario puede agregar clientes nuevos **en sesión** desde el wizard (Paso 1
-del Seteador y el select del Evaluador), vía `addClient()` en
+del Seteador), vía `addClient()` en
 [`useSetterForm.js`](../../src/hooks/useSetterForm.js) — esos clientes
 agregados a mano **no persisten**: viven solo en el estado de React y
 desaparecen al refrescar la página. No hay persistencia de clientes hoy (ver
@@ -61,6 +61,5 @@ cosa: elegir la `fuente_verdad` de cada KPI (`fuenteDeVerdad()` en
 | `anio-completo` | Año completo | 365 |
 
 El campo `dias` **sí se usa** para calcular el pacing: `diasDelPeriodo()` en
-`setterCalculator.js`/`evaluatorCalculator.js` lo lee para ubicar cada
-bloque de 25/50/75/100% en un día concreto del período (ej. "Día 8" para el
-25% de un `mes-1`).
+`setterCalculator.js` lo lee para ubicar cada bloque de 25/50/75/100% en un
+día concreto del período (ej. "Día 8" para el 25% de un `mes-1`).

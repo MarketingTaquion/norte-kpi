@@ -4,8 +4,8 @@ Los benchmarks de mercado (CTR, CPC, CPM, CPL, ROAS, etc.) y las reglas de
 clasificación viven como datos estructurados en
 [`src/lib/calculator/benchmarks.js`](../../src/lib/calculator/benchmarks.js) y
 [`src/lib/calculator/kpiCatalog.js`](../../src/lib/calculator/kpiCatalog.js).
-Actualizarlos no requiere tocar ningún componente de React — el wizard, el
-Evaluador y la API pública leen de ahí automáticamente.
+Actualizarlos no requiere tocar ningún componente de React — el wizard y la
+API pública leen de ahí automáticamente.
 
 ## Actualizar un benchmark (ej. rango de CPC de Meta Ads)
 
@@ -15,9 +15,8 @@ Abrí `benchmarks.js` y editá el objeto correspondiente en `BENCHMARKS`:
 cpc_meta: { min: 150, max: 800, unit: 'moneda', label: 'CPC Meta Ads (B2C)' },
 ```
 
-Ese mismo objeto lo usan tanto el Seteador (para proyectar) como el
-Evaluador (para chequear el criterio A) — no hay una copia separada por
-flujo, así que un solo cambio alcanza. Ver
+Ese mismo objeto lo usa el Seteador para proyectar — no hay una copia
+separada por flujo, así que un solo cambio alcanza. Ver
 [reference: calculadora](../reference/calculator.md) para la lista completa
 de keys y quién las usa.
 

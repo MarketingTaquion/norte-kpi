@@ -12,11 +12,10 @@ usando [`vercel.json`](../../vercel.json) (`npm run build`, publica `dist/`,
 rewrite de SPA que excluye `/api/*`). Mirá el progreso en
 **Vercel → norte-kpi → Deployments**.
 
-Los dos endpoints de `api/*.js` (`kpi-estimate.js`, `kpi-evaluate.js`) se
-despliegan automáticamente como Vercel Functions — no hace falta ningún
-rewrite adicional para que `/api/kpi-estimate` funcione, a diferencia de
-Netlify. El wizard y el Evaluador no necesitan ninguna function: calculan
-todo en el browser (ver [explanation: arquitectura](../explanation/architecture.md)).
+El endpoint `api/kpi-estimate.js` se despliega automáticamente como Vercel
+Function — no hace falta ningún rewrite adicional para que
+`/api/kpi-estimate` funcione, a diferencia de Netlify. El wizard no necesita
+ninguna function: calcula todo en el browser (ver [explanation: arquitectura](../explanation/architecture.md)).
 
 ## Conectar el proyecto desde cero
 
@@ -34,7 +33,7 @@ todo en el browser (ver [explanation: arquitectura](../explanation/architecture.
 
 ## Cargar la API key (solo si vas a usar la API pública)
 
-El wizard y el Evaluador funcionan de una, sin ninguna variable de entorno.
+El wizard funciona de una, sin ninguna variable de entorno.
 `NORTE_API_KEY` **no está en el repo** — solo hace falta si vas a integrar
 la [API pública](../reference/api.md) con otra herramienta:
 

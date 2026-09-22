@@ -9,9 +9,9 @@ Taquion no controla.
 
 Por eso, desde 2026-09-18, todo el cálculo vive en
 [`src/lib/calculator/`](../../src/lib/calculator/) — código puro, sin
-llamadas de red, sin API key, sin modelo de lenguaje. El wizard y el
-Evaluador calculan el resultado **en el momento, en el browser**, apenas el
-usuario toca "Generar estimación" o "Auditar KPI".
+llamadas de red, sin API key, sin modelo de lenguaje. El wizard calcula el
+resultado **en el momento, en el browser**, apenas el usuario toca "Generar
+estimación".
 
 ## Las tres piezas del motor
 
@@ -39,7 +39,7 @@ ahora datos estructurados en
 `{ min, max, unit, label }` por métrica. La calculadora los lee directamente,
 nunca los "recuerda" ni los aproxima.
 
-### 3. Proyección — `setterCalculator.js` / `evaluatorCalculator.js`
+### 3. Proyección — `setterCalculator.js`
 
 Con la categoría y los benchmarks en mano, el cálculo de la proyección es
 aritmética simple:
@@ -51,10 +51,6 @@ aritmética simple:
   caro y el más barato del benchmark.
 - **Sin presupuesto**: se devuelve el rango de benchmark tal cual, marcado
   como referencial — nunca se inventa una meta cerrada sin plata detrás.
-
-Para el Evaluador, la misma lógica se usa en sentido inverso: a partir del
-número que declaró el equipo (ej. "500 leads") y el benchmark de costo, se
-estima el costo total y se compara contra el neto disponible.
 
 ## Chequeo impositivo (Tax Check) — el único cálculo que nunca cambió
 
@@ -68,26 +64,6 @@ filosofía correcta desde el principio era "todo lo que tiene fórmula cerrada
 se resuelve en código, nunca se le pide a un modelo que lo calcule". El resto
 del motor de cálculo simplemente extiende ese mismo principio a todo lo demás
 que antes se delegaba en Claude.
-
-## Auditoría S.M.A.R.T. del Evaluador — reglas, no juicio de un modelo
-
-`evaluatorCalculator.js` audita cada criterio con una regla concreta y
-verificable:
-
-- **S** (Específico): ¿hay un verbo de acción declarado?
-- **M** (Medible): ¿el indicador tiene un número concreto? (regex sobre el
-  texto, ver [`firstNumber`](../../src/lib/calculator/text.js))
-- **A** (Alcanzable): ¿el número pedido es plausible contra el benchmark de
-  la categoría? (ej. ROAS 20x en el primer mes se marca como improbable)
-- **R** (Relevante): ¿hay un segmento declarado, y la métrica no es de
-  vanidad? (keywords como "likes" sin conexión a negocio se detectan y
-  bajan directo a `RECHAZADO_VANIDAD`)
-- **T** (Tiempo): ¿hay un plazo definido (lapso o fechas)?
-
-El veredicto final (`APROBADO` / `RECHAZADO_VANIDAD` /
-`RECHAZADO_INVIABILIDAD` / `CONDICIONADO`) sale de un árbol de decisión fijo
-sobre estos cinco checks más la viabilidad financiera — nunca de una
-"impresión" de qué tan bien redactado está el KPI.
 
 ## Los límites de este enfoque (y por qué son aceptables)
 

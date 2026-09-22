@@ -7,18 +7,15 @@ o qué benchmark usa cada categoría, está acá.
 
 ## Categorías — `kpiCatalog.js`
 
-Ambos formularios (Seteador y Evaluador) tienen un select obligatorio
-**Métrica**, poblado con `CATEGORY_OPTIONS` — el usuario elige la categoría
-explícitamente en vez de depender de que el texto libre matchee una keyword.
-`findCategory(categoria)` resuelve ese value; si no hay `categoria` (por
-ejemplo, una integración de la API que todavía manda solo texto plano), se
-cae a `classifyText()` como fallback. En el Seteador cada `pedido` tiene su
-propia `categoria` (fila `{ texto, categoria }`); en el Evaluador es un solo
-campo a nivel formulario.
+El formulario del Seteador tiene un select obligatorio **Métrica**, poblado
+con `CATEGORY_OPTIONS` — el usuario elige la categoría explícitamente en vez
+de depender de que el texto libre matchee una keyword. `findCategory(categoria)`
+resuelve ese value; si no hay `categoria` (por ejemplo, una integración de la
+API que todavía manda solo texto plano), se cae a `classifyText()` como
+fallback. Cada `pedido` tiene su propia `categoria` (fila `{ texto, categoria }`).
 
 Orden de `classifyText()` cuando no hay `categoria` explícita: gana la
-primera keyword que matchea en el texto (`accion` + `indicador` para el
-Evaluador, cada `pedido` para el Seteador):
+primera keyword que matchea en el texto de cada `pedido`:
 
 | Categoría | Keywords (ejemplos) | SOP | KPI técnico | `modo` de proyección |
 |---|---|---|---|---|
@@ -92,20 +89,3 @@ plata/leads/clics/%) tienen además un segundo techo, independiente del
 presupuesto: la población real de la localidad declarada. Ver
 [reference: territorios](territorios.md) para el detalle completo (fuentes,
 cómo se calcula, qué plataformas tienen techo aplicable).
-
-## Reglas del Evaluador — detección de patrones
-
-`evaluatorCalculator.js` aplica estas reglas concretas (no "juicio" de
-ningún modelo):
-
-| Patrón detectado | Efecto |
-|---|---|
-| `indicador` sin ningún número (regex `firstNumber`) | Falla criterio **M** |
-| ROAS + palabras "utilidad"/"ganancia"/"margen" en indicador o contexto | Falla criterio **M** — ROAS mal calculado |
-| Categoría `roas` con número pedido > 2.5× el benchmark máximo | Falla criterio **A** — meta improbable |
-| Categoría `costo_por_unidad` con número pedido < 0.3× el benchmark mínimo | Falla criterio **A** — costo objetivo irreal |
-| `indicador` contiene "like"/"me gusta" sin mención de negocio en segmento/contexto | Marca vanidad → `RECHAZADO_VANIDAD` directo |
-| Sin `periodo` (ni lapso ni fechas) | Falla criterio **T** |
-
-El árbol de decisión del veredicto final está documentado en
-[explanation: motor de cálculo](../explanation/calculation-engine.md).

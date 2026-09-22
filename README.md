@@ -2,8 +2,7 @@
 
 Herramienta interna de Taquion/Ignite: traduce pedidos coloquiales de
 clientes en estimaciones de KPIs con proyección financiera y pacing
-(Seteador), y audita de forma independiente un KPI antes de presentarlo al
-cliente (Evaluador). Los resultados los calcula una **calculadora interna
+(Seteador). Los resultados los calcula una **calculadora interna
 determinística** (`src/lib/calculator/`) — sin IA, sin API key, sin llamada
 de red. React + Vite + una API pública opcional en funciones serverless
 (Vercel Functions como plataforma principal, Netlify Functions como
@@ -23,9 +22,9 @@ npm install
 npm run dev
 ```
 
-Listo — el wizard y el Evaluador funcionan de una, sin ninguna variable de
-entorno. `NORTE_API_KEY` solo hace falta si vas a probar la API pública
-(`/api/kpi-estimate`, `/api/kpi-evaluate`) para integraciones externas.
+Listo — el wizard funciona de una, sin ninguna variable de entorno.
+`NORTE_API_KEY` solo hace falta si vas a probar la API pública
+(`/api/kpi-estimate`) para integraciones externas.
 
 Guía completa, paso a paso, con resultado esperado:
 [docs/tutorials/getting-started.md](docs/tutorials/getting-started.md).

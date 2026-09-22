@@ -1,12 +1,11 @@
 # Probar la API pública en local con Netlify Dev
 
-`npm run dev` (Vite solo) alcanza para todo el wizard y el Evaluador — no
+`npm run dev` (Vite solo) alcanza para todo el wizard — no
 necesitás esta guía para el uso normal de Norte-kpi (ver
 [tutorial de inicio](../tutorials/getting-started.md)). Netlify Dev solo hace
-falta si querés probar en local los endpoints de la
-[API pública](../reference/api.md) (`/api/kpi-estimate`,
-`/api/kpi-evaluate`) tal como los llamaría una herramienta externa —
-`npm run dev` no levanta esas functions.
+falta si querés probar en local el endpoint de la
+[API pública](../reference/api.md) (`/api/kpi-estimate`) tal como lo
+llamaría una herramienta externa — `npm run dev` no levanta esa function.
 
 ## Pasos
 

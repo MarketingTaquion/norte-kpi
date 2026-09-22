@@ -459,63 +459,6 @@ input:focus, textarea:focus, select:focus {
   overflow: auto;
 }
 
-/* --- Result banners --- */
-.banner {
-  border-radius: var(--tq-radius-md);
-  padding: 18px 22px;
-  margin-bottom: var(--tq-space-3);
-  border: var(--tq-border-hairline) solid var(--tq-line);
-}
-
-.banner.nsm {
-  background: var(--tq-gradiente-comunidad);
-  border: 0;
-  color: var(--tq-blanco);
-}
-
-.banner.nsm .banner-title,
-.banner.nsm .banner-sub {
-  color: rgba(255, 255, 255, 0.86);
-}
-
-.banner.verdict-aprobado {
-  background: var(--tq-surface-page);
-  border-color: var(--tq-negro);
-  border-left-width: 4px;
-}
-.banner.verdict-condicionado,
-.banner.verdict-rechazado_vanidad {
-  background: var(--tq-surface-subtle);
-  border-color: var(--tq-naranja);
-  border-left-width: 4px;
-}
-.banner.verdict-rechazado_inviabilidad {
-  background: var(--tq-surface-subtle);
-  border-color: var(--tq-fucsia);
-  border-left-width: 4px;
-}
-
-.banner-title {
-  font-size: var(--tq-size-eyebrow);
-  text-transform: uppercase;
-  letter-spacing: var(--tq-tracking-caps);
-  color: var(--tq-text-muted);
-  margin-bottom: 4px;
-  font-weight: var(--tq-weight-semibold);
-}
-
-.banner-value {
-  font-size: 22px;
-  font-weight: var(--tq-weight-black);
-  letter-spacing: -0.01em;
-}
-
-.banner-sub {
-  font-size: 13px;
-  color: var(--tq-text-muted);
-  margin-top: 4px;
-}
-
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -968,75 +911,6 @@ input:focus, textarea:focus, select:focus {
   color: var(--tq-blanco);
 }
 
-.pacing-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-}
-
-@media (max-width: 700px) {
-  .pacing-grid { grid-template-columns: repeat(2, 1fr); }
-}
-
-.pacing-card {
-  background: var(--tq-surface-subtle);
-  border: var(--tq-border-hairline) solid var(--tq-line);
-  border-radius: var(--tq-radius-sm);
-  padding: 12px;
-  text-align: center;
-}
-
-.pacing-card .pacing-pct {
-  font-size: 18px;
-  font-weight: var(--tq-weight-bold);
-  color: var(--tq-negro);
-  font-variant-numeric: tabular-nums;
-}
-
-.pacing-card .pacing-meta {
-  font-size: 12px;
-  color: var(--tq-text-muted);
-  margin-top: 4px;
-}
-
-.smart-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 10px;
-}
-
-@media (max-width: 900px) {
-  .smart-grid { grid-template-columns: repeat(2, 1fr); }
-}
-
-.smart-card {
-  border-radius: var(--tq-radius-sm);
-  border: var(--tq-border-hairline) solid var(--tq-line);
-  padding: 12px;
-  background: var(--tq-blanco);
-  border-left-width: 3px;
-}
-
-.smart-card.pass {
-  border-left-color: var(--tq-negro);
-}
-.smart-card.fail {
-  border-left-color: var(--tq-fucsia);
-}
-
-.smart-card .smart-letter {
-  font-size: 20px;
-  font-weight: var(--tq-weight-black);
-  color: var(--tq-text-strong);
-}
-.smart-card.fail .smart-letter { color: var(--tq-fucsia); }
-
-.smart-card .smart-note {
-  font-size: 12px;
-  color: var(--tq-text-muted);
-  margin-top: 6px;
-}
-
 .list-plain {
   margin: 0;
   padding-left: 18px;
@@ -1108,34 +982,6 @@ input:focus, textarea:focus, select:focus {
   font-size: 13px;
   font-weight: var(--tq-weight-semibold);
   color: var(--tq-text-muted);
-}
-
-.viability-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-}
-
-.viability-item {
-  background: var(--tq-surface-subtle);
-  border: var(--tq-border-hairline) solid var(--tq-line);
-  border-radius: var(--tq-radius-sm);
-  padding: 10px 12px;
-}
-
-.viability-item .v-label {
-  font-size: 11px;
-  color: var(--tq-text-faint);
-  text-transform: uppercase;
-  letter-spacing: var(--tq-tracking-caps);
-}
-
-.viability-item .v-value {
-  font-size: 16px;
-  font-weight: var(--tq-weight-bold);
-  margin-top: 2px;
-  font-variant-numeric: tabular-nums;
-  color: var(--tq-text-strong);
 }
 
 /* --- Wizard (Seteador): pantalla limpia, configuración paso a paso --- */

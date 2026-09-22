@@ -27,10 +27,10 @@ probablemente esté en otra categoría de esta misma lista.
 ## Referencia (Reference)
 
 - [Estructura del repositorio](reference/repository-structure.md)
-- [API pública — `/api/kpi-estimate` y `/api/kpi-evaluate`](reference/api.md)
+- [API pública — `/api/kpi-estimate`](reference/api.md)
 - [Calculadora interna — categorías, benchmarks y reglas](reference/calculator.md)
 - [Territorios — techo poblacional por localidad y plataforma](reference/territorios.md)
-- [Schema de salida (Seteador / Evaluador)](reference/output-schema.md)
+- [Schema de salida (Seteador)](reference/output-schema.md)
 - [Datos de configuración (clientes, etapas, plataformas, lapsos)](reference/configuration-data.md)
 - [Variables de entorno](reference/environment-variables.md)
 
@@ -39,7 +39,7 @@ probablemente esté en otra categoría de esta misma lista.
 - [Arquitectura: por qué el cálculo es client-side y la API es opcional](explanation/architecture.md)
 - [Motor de cálculo: por qué es 100% determinístico, sin IA](explanation/calculation-engine.md)
 - [Sistema de diseño (Design System): por qué se usan los tokens reales de Taquion](explanation/design-system.md)
-- [Por qué el Seteador es un wizard y el Evaluador no](explanation/product-decisions.md)
+- [Por qué el Seteador es un wizard](explanation/product-decisions.md)
 
 ---
 

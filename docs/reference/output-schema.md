@@ -1,9 +1,8 @@
-# Schema de salida (Seteador / Evaluador)
+# Schema de salida (Seteador)
 
-Contrato de datos que devuelve `src/lib/calculator/setterCalculator.js` y
-`evaluatorCalculator.js` — el mismo shape que consumen `SetterResult.jsx` /
-`EvaluatorResult.jsx` en el browser, y el mismo que devuelve la API pública
-(`/api/kpi-estimate`, `/api/kpi-evaluate`). Un solo contrato, tres
+Contrato de datos que devuelve `src/lib/calculator/setterCalculator.js` — el
+mismo shape que consume `SetterResult.jsx` en el browser, y el mismo que
+devuelve la API pública (`/api/kpi-estimate`). Un solo contrato, dos
 consumidores.
 
 ## Seteador — `calculateSetterResult()`
@@ -135,50 +134,15 @@ WhatsApp (`desgloseIdentidad()` en `territorio.js`, reutilizando
 `rubro.pctNominizado`); antes de esa etapa el SOM es solo gente alcanzable
 por pauta, sin ninguna noción de identidad.
 
-## Evaluador — `calculateEvaluatorResult()`
-
-```json
-{
-  "veredicto": "APROBADO | RECHAZADO_VANIDAD | RECHAZADO_INVIABILIDAD | CONDICIONADO",
-  "confianza_pct": 0,
-  "smart": {
-    "s": { "pass": true, "nota": "string" },
-    "m": { "pass": true, "nota": "string" },
-    "a": { "pass": true, "nota": "string" },
-    "r": { "pass": true, "nota": "string" },
-    "t": { "pass": true, "nota": "string" }
-  },
-  "viabilidad": {
-    "presupuesto_bruto": 0,
-    "presupuesto_neto": 0,
-    "costo_estimado": 0,
-    "superavit_deficit": 0
-  },
-  "dias_totales": 0,
-  "pacing_sugerido": [
-    { "bloque": "25%", "meta_acumulada": "string" },
-    { "bloque": "50%", "meta_acumulada": "string" },
-    { "bloque": "75%", "meta_acumulada": "string" },
-    { "bloque": "100%", "meta_acumulada": "string" }
-  ],
-  "riesgos": ["string"],
-  "recomendaciones": ["string", "string", "string"],
-  "kpi_alternativo": "string o null si el veredicto es APROBADO"
-}
-```
-
 ## Reglas de formato
 
-- `veredicto` es uno de exactamente 4 valores fijos — no hay un quinto
-  estado.
-- Los campos numéricos (`presupuesto`, montos, `dias_totales`, etc.) son
-  siempre `number`, nunca `null` — se usa `0` cuando no hay dato.
-- `riesgos` tiene como máximo 2 items, `recomendaciones` exactamente 3.
+- Los campos numéricos (`presupuesto`, montos, etc.) son siempre `number`,
+  nunca `null` — se usa `0` cuando no hay dato.
 
 ## Si la calculadora recibe datos inesperados
 
-`SetterTab.jsx` y `EvaluatorTab.jsx` envuelven el cálculo en un `try/catch` —
-si algo inesperado rompe el cálculo (ej. una fecha malformada), se muestra en
-el `ErrorBox` en vez de romper la UI en silencio. En la API pública, un error
-así propaga como una excepción no capturada — la plataforma (Vercel/Netlify)
-la devuelve como `500` genérico.
+`SetterTab.jsx` envuelve el cálculo en un `try/catch` — si algo inesperado
+rompe el cálculo (ej. una fecha malformada), se muestra en el `ErrorBox` en
+vez de romper la UI en silencio. En la API pública, un error así propaga
+como una excepción no capturada — la plataforma (Vercel/Netlify) la
+devuelve como `500` genérico.

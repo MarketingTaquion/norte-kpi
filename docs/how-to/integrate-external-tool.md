@@ -26,19 +26,6 @@ curl -X POST https://norte-kpi.vercel.app/api/kpi-estimate \
   }'
 ```
 
-Auditar un KPI:
-
-```bash
-curl -X POST https://norte-kpi.vercel.app/api/kpi-evaluate \
-  -H "Content-Type: application/json" \
-  -H "X-Api-Key: TU_NORTE_API_KEY" \
-  -d '{
-    "accion": "Captar",
-    "indicador": "500 leads calificados",
-    "segmento": "Dueños de PyMEs, 35-55 años, CABA"
-  }'
-```
-
 Si te devuelve `401`, revisá el header (tiene que ser exactamente `X-Api-Key`,
 no `Authorization`). Si te devuelve `422`, te dice en el mensaje qué campo
 obligatorio falta.
@@ -46,8 +33,7 @@ obligatorio falta.
 ## 3. Integrar desde n8n
 
 1. Nodo **HTTP Request**.
-2. Method: `POST`. URL: `https://norte-kpi.vercel.app/api/kpi-estimate` (o
-   `kpi-evaluate`).
+2. Method: `POST`. URL: `https://norte-kpi.vercel.app/api/kpi-estimate`.
 3. **Headers**: agregá `X-Api-Key` con el valor de la key (guardala como
    credencial de n8n, no hardcodeada en el nodo, para poder rotarla sin tocar
    el workflow).
@@ -55,9 +41,9 @@ obligatorio falta.
    [la tabla de request](../reference/api.md#post-apikpi-estimate) — podés
    mapear campos de un nodo anterior (ej. un formulario, un CRM) a este JSON.
 5. El nodo siguiente recibe directamente el JSON de la respuesta (matriz de
-   KPIs, o veredicto) — es el mismo cálculo determinístico del browser, no
-   depende de ningún servicio externo, así que no hay que lidiar con
-   timeouts ni reintentos de un modelo de IA.
+   KPIs) — es el mismo cálculo determinístico del browser, no depende de
+   ningún servicio externo, así que no hay que lidiar con timeouts ni
+   reintentos de un modelo de IA.
 
 ## 4. Manejo de errores en el workflow
 

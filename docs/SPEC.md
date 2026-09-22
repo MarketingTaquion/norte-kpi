@@ -19,13 +19,11 @@ herramienta.
 
 Herramienta interna de Taquion/Ignite para que el equipo comercial convierta
 un pedido coloquial de cliente en una **estimación de KPIs técnicos con
-proyección financiera y pacing**, y para que el Líder de Ignite **audite de
-forma independiente** cualquier KPI antes de presentarlo al cliente.
+proyección financiera y pacing**.
 
 | Módulo | Quién lo usa | Qué produce | Documentación |
 |---|---|---|---|
 | **Seteador** (wizard) | Estratega / AM | Estimación: matriz de KPIs SMART, Tax Check, pacing, NSM | [Tutorial](tutorials/getting-started.md) · [Por qué es un wizard](explanation/product-decisions.md) |
-| **Evaluador** (formulario) | Líder de Ignite | Auditoría independiente: veredicto, análisis SMART, viabilidad | [Por qué no es un wizard](explanation/product-decisions.md) |
 
 Ver [`docs/index.md`](index.md) para arquitectura, motor de cálculo, design
 system y todo el detalle técnico.
@@ -36,18 +34,16 @@ system y todo el detalle técnico.
 |---|---|---|
 | Persistencia de estimaciones por cliente | Alta | hoy no persiste nada — cada estimación se pierde al refrescar |
 | Export a PDF de la matriz de KPIs | Alta | para adjuntar a la propuesta comercial |
-| Wizard también para el Evaluador | Baja | descartado en v1 — es una auditoría puntual, no progresiva (ver [explanation](explanation/product-decisions.md)) |
 | Autenticación por rol (Estratega / Líder) | Media | hoy el acceso es único vía Basic Auth / acceso de team |
 | Histórico real de CPL/CPA/ROAS por cliente | Alta | mejoraría la precisión de la proyección más que agregar más benchmarks genéricos |
 | Benchmarks B2B vs B2C automáticos | Media | hoy la calculadora usa siempre el rango B2C por default — ver [reference: calculadora](reference/calculator.md) |
 
 ## Checklist de lanzamiento
 
-- [ ] `NORTE_API_KEY` cargada en Vercel (Production + Preview) si vas a usar la API pública — ver [how-to: deploy a Vercel](how-to/deploy-to-vercel.md). El wizard y el Evaluador no necesitan ninguna variable.
+- [ ] `NORTE_API_KEY` cargada en Vercel (Production + Preview) si vas a usar la API pública — ver [how-to: deploy a Vercel](how-to/deploy-to-vercel.md). El wizard no necesita ninguna variable.
 - [ ] `.env.local` nunca commiteado (verificar `.gitignore`)
-- [ ] `npm run dev` local: wizard completo genera resultado, Evaluador devuelve veredicto — sin ningún `ErrorBox`
+- [ ] `npm run dev` local: wizard completo genera resultado — sin ningún `ErrorBox`
 - [ ] Probar sin presupuesto (KPIs referenciales, sin Tax Check) y con presupuesto (Tax Check correcto)
-- [ ] Probar los 4 veredictos del Evaluador
 - [ ] Acceso restringido configurado antes de compartir la URL con el equipo
 
 ## Nota sobre plataforma de deploy

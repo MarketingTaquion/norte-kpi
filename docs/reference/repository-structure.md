@@ -3,11 +3,9 @@
 ```
 norte-kpi/
 ├── api/                               ← Vercel Functions (principal), ver reference/api.md
-│   ├── kpi-estimate.js                ← API pública
-│   └── kpi-evaluate.js                ← API pública
+│   └── kpi-estimate.js                ← API pública
 ├── netlify/functions/                 ← Netlify Functions (secundaria), mismo contrato que api/
-│   ├── kpi-estimate.js
-│   └── kpi-evaluate.js
+│   └── kpi-estimate.js
 ├── public/
 │   ├── fonts/                        ← Archivo (Regular…Black), copiado del design system de Taquion
 │   └── logo/                         ← isotipo + lockup horizontal, copiado del design system de Taquion
@@ -18,11 +16,10 @@ norte-kpi/
 │   ├── lib/
 │   │   ├── calculator/               ← el "cerebro": categorías, benchmarks, territorio, cálculo (ver reference/calculator.md, reference/territorios.md)
 │   │   └── apiAuth.js                ← auth de la API pública (X-Api-Key), compartido entre api/ y netlify/functions/
-│   ├── hooks/                        ← useSetterForm, useEvaluatorForm
+│   ├── hooks/                        ← useSetterForm
 │   ├── utils/tax.js                  ← Tax Check (bruto → neto)
 │   └── components/
 │       ├── setter/                   ← SetterWizard, SetterResult, KpiCards, TaxCheckStrip, PacingTracker…
-│       ├── evaluator/                ← EvaluatorForm, EvaluatorResult, SmartGrid…
 │       └── shared/                   ← SelectableItem, ChipItem, PeriodPicker, TaxPreview, SeverityGauge, RangeMeter…
 ├── docs/                             ← esta documentación
 ├── vercel.json                       ← build command, publish dir, rewrite de SPA (Vercel, principal)
@@ -31,8 +28,8 @@ norte-kpi/
 ```
 
 `src/lib/calculator/` es la pieza que evita duplicar lógica de negocio entre
-el wizard/Evaluador (que la importan directo y calculan en el browser, sin
-red) y la API pública: tanto `api/*.js` (Vercel) como
+el wizard (que la importa directo y calcula en el browser, sin red) y la API
+pública: tanto `api/*.js` (Vercel) como
 `netlify/functions/*.js` (Netlify) importan de ahí — lo único que cada
 plataforma tiene por separado es el archivo de entrada con la firma que su
 runtime espera (`(req, res)` en Vercel, `exports.handler = (event) => ...`

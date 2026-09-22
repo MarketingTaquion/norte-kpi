@@ -22,11 +22,11 @@ npm run dev
 
 Esto abre el proyecto en `http://localhost:5173` (Vite elige el próximo
 puerto libre si ese está ocupado). No hace falta Netlify CLI ni Vercel CLI
-para esto — el wizard y el Evaluador corren enteramente en el browser.
+para esto — el wizard corre enteramente en el browser.
 
 ## 3. Generá tu primera estimación
 
-1. Entrá a la URL que imprimió `npm run dev`. Vas a ver la tab **01 · Seteador de KPIs**
+1. Entrá a la URL que imprimió `npm run dev`. Vas a ver el **Seteador de KPIs**
    con el wizard en el Paso 1.
 2. **Paso 1 — Cliente**: elegí "Demo Retail" (o cualquiera de los demos) y
    tocá **Continuar**.
@@ -53,8 +53,6 @@ resultado.
 
 ## Próximos pasos
 
-- Para entender qué hace la tab **02 · Evaluador de KPIs**, probala directo:
-  no es un wizard, es un formulario de una sola pantalla.
 - Para entender cómo se calcula cada número (nada de esto es magia ni IA):
   [explanation: motor de cálculo](../explanation/calculation-engine.md).
 - Para deployar esto a Netlify o Vercel:

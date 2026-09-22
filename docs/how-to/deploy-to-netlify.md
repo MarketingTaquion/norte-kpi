@@ -34,7 +34,7 @@ progreso en **Netlify → norte-kpi → Deploys**.
 
 ## Cargar la API key (solo si vas a usar la API pública)
 
-El wizard y el Evaluador funcionan de una, sin ninguna variable de entorno.
+El wizard funciona de una, sin ninguna variable de entorno.
 `NORTE_API_KEY` **no está en el repo** (por diseño, ver
 [variables de entorno](../reference/environment-variables.md)) y solo hace
 falta si vas a integrar la API pública con otra herramienta:

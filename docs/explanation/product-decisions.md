@@ -1,6 +1,6 @@
-# Por qué el Seteador es un wizard y el Evaluador no
+# Por qué el Seteador es un wizard
 
-## El Seteador: wizard de 7 pasos
+## Wizard de 7 pasos
 
 El Seteador arranca cada estimación como un flujo guiado paso a paso
 (cliente → etapa → período → presupuesto → plataformas → pedidos + NSM →
@@ -20,24 +20,7 @@ resetea el wizard al paso 1 — ver
 deliberado: la estimación anterior no queda "compitiendo" visualmente con la
 posibilidad de armar una nueva.
 
-## El Evaluador: formulario de una sola pantalla
-
-El Evaluador se mantiene como un formulario split (form a la izquierda,
-resultado a la derecha) — ver
-[`EvaluatorTab.jsx`](../../src/components/evaluator/EvaluatorTab.jsx).
-
-La razón es el tipo de tarea: auditar un KPI ya redactado es **una consulta
-puntual**, no una cotización progresiva. Quien lo usa (el Líder de Ignite) ya
-sabe exactamente qué KPI quiere auditar y con qué datos — no hay una secuencia
-natural de "primero esto, después esto otro" que un wizard aporte valor
-guiando. Convertirlo en wizard hubiera agregado fricción (más clics para
-llegar al mismo resultado) sin ninguna ganancia de claridad.
-
 Esta fue una decisión explícita tomada con el equipo al construir la v1, no
-un default por falta de tiempo — si en algún momento el Evaluador gana pasos
-adicionales (por ejemplo, un flujo de aprobación de varios KPIs en batch), vale
-la pena reabrir esta decisión.
-
-<!-- TODO(humano): si se agrega batch de KPIs al Evaluador (ver roadmap en
-docs/SPEC.md), ¿sigue teniendo sentido un formulario único, o pasa a
-justificar un wizard también? -->
+un default por falta de tiempo — si en algún momento el Seteador necesita
+soportar un flujo distinto (por ejemplo, editar una estimación ya generada en
+vez de arrancar siempre desde cero), vale la pena reabrir esta decisión.
