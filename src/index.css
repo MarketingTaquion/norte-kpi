@@ -696,6 +696,65 @@ input:focus, textarea:focus, select:focus {
   padding: 3px 9px;
 }
 
+.kpi-card-confianza {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: var(--tq-weight-semibold);
+  letter-spacing: var(--tq-tracking-caps);
+  border-radius: var(--tq-radius-sm);
+  padding: 3px 8px;
+  margin-top: 8px;
+}
+
+.kpi-card-confianza-alta {
+  color: var(--tq-negro);
+  background: var(--tq-surface-page);
+  border: var(--tq-border-hairline) solid var(--tq-negro);
+}
+
+.kpi-card-confianza-interna {
+  color: var(--tq-naranja);
+  background: var(--tq-surface-subtle);
+  border: var(--tq-border-hairline) solid var(--tq-naranja);
+}
+
+.kpi-card-funnel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: var(--tq-border-hairline) solid var(--tq-line);
+}
+
+.kpi-card-funnel-item {
+  flex: 1;
+  text-align: center;
+}
+
+.kpi-card-funnel-valor {
+  font-size: 16px;
+  font-weight: var(--tq-weight-black);
+  margin-top: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+.kpi-card-funnel-arrow {
+  color: var(--tq-text-faint);
+  font-size: 14px;
+  flex: 0 0 auto;
+}
+
+.kpi-card-disclaimer {
+  font-size: 11px;
+  color: var(--tq-text-faint);
+  font-style: italic;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: var(--tq-border-hairline) solid var(--tq-line);
+}
+
 .kpi-card-identidad {
   display: grid;
   grid-template-columns: 1fr 1fr;

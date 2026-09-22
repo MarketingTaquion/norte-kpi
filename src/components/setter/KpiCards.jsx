@@ -34,6 +34,11 @@ export default function KpiCards({ kpis }) {
               <div className="range-meter-labels">
                 <span>min</span><span>max</span>
               </div>
+              {k.confianza?.som ? (
+                <div className={`kpi-card-confianza kpi-card-confianza-${k.confianza.som.nivel}`}>
+                  {k.confianza.som.label}
+                </div>
+              ) : null}
             </div>
             <div className="kpi-card-gauge-col">
               <div className="kpi-card-col-label" style={{ textAlign: 'center' }}>Agresividad</div>
@@ -45,6 +50,25 @@ export default function KpiCards({ kpis }) {
               />
             </div>
           </div>
+
+          {k.tam != null || k.sam != null ? (
+            <div className="kpi-card-funnel">
+              <div className="kpi-card-funnel-item">
+                <div className="kpi-card-col-label">Universo (TAM)</div>
+                <div className="kpi-card-funnel-valor">{k.tam != null ? k.tam.toLocaleString('es-AR') : '—'}</div>
+              </div>
+              <span className="kpi-card-funnel-arrow">→</span>
+              <div className="kpi-card-funnel-item">
+                <div className="kpi-card-col-label">Zona + intereses (SAM)</div>
+                <div className="kpi-card-funnel-valor">{k.sam != null ? k.sam.toLocaleString('es-AR') : '—'}</div>
+              </div>
+              <span className="kpi-card-funnel-arrow">→</span>
+              <div className="kpi-card-funnel-item">
+                <div className="kpi-card-col-label">Estimado (SOM)</div>
+                <div className="kpi-card-funnel-valor">{k.som.min.toLocaleString('es-AR')}–{k.som.max.toLocaleString('es-AR')}</div>
+              </div>
+            </div>
+          ) : null}
 
           {k.desglose_identidad ? (
             <div className="kpi-card-identidad">
@@ -77,6 +101,9 @@ export default function KpiCards({ kpis }) {
           ) : null}
         </div>
       ))}
+      <p className="kpi-card-disclaimer">
+        Proyección de planificación interna, no es un compromiso — no reemplaza el historial real de la cuenta del cliente.
+      </p>
     </div>
   );
 }

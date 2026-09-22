@@ -1,16 +1,19 @@
-// Techo poblacional: límite superior de "personas alcanzables" en una
+// Techo poblacional (SAM): límite superior de "personas alcanzables" en una
 // localidad y plataforma dadas, para que la calculadora nunca proyecte más
-// alcance/seguidores que la cantidad de gente que realmente vive ahí.
+// alcance/seguidores que la cantidad de gente que realmente vive ahí. El
+// mismo cálculo sin territorio (población total del país) da el TAM.
 //
-// Fuentes: población — INDEC Censo Nacional 2022 (ver src/data/territorios.js).
-// Penetración de internet y de cada plataforma en Argentina — DataReportal
-// "Digital 2026: Argentina" (oct. 2025), sobre base de usuarios de internet,
-// no de población total (por eso INTERNET_PENETRATION_PCT se aplica aparte).
-// Pirámide etaria — INDEC Censo 2022 (ver src/data/rangosEtarios.js). El
-// factor por rubro (src/data/rubros.js) es una estimación interna, no tiene
-// fuente externa — ver el comment ahí.
+// Fuentes: población — INDEC Censo 2022 actualizado a proyección 2026 (ver
+// src/data/territorios.js y src/data/argentina.js). Penetración de internet
+// y de cada plataforma en Argentina — DataReportal "Digital 2026: Argentina"
+// (oct. 2025), sobre base de usuarios de internet, no de población total
+// (por eso INTERNET_PENETRATION_PCT se aplica aparte). Pirámide etaria —
+// INDEC Censo 2022 (ver src/data/rangosEtarios.js). El factor por rubro
+// (src/data/rubros.js) es una estimación interna, no tiene fuente externa —
+// ver el comment ahí.
 import { TERRITORIOS } from '../../data/territorios.js';
 import { RANGOS_ETARIOS } from '../../data/rangosEtarios.js';
+import { POBLACION_ARGENTINA_TOTAL_2026 } from '../../data/argentina.js';
 
 export const INTERNET_PENETRATION_PCT = 0.906;
 
@@ -57,17 +60,28 @@ export function findRangoEtario(value) {
   return RANGOS_ETARIOS.find((r) => r.value === value) || null;
 }
 
-// Devuelve el techo de personas alcanzables para esa plataforma en esa
-// localidad, o null si no hay territorio declarado o la plataforma no tiene
-// familia de penetración conocida — en esos casos no se aplica recorte.
-export function techoPoblacional(territorio, plataformaValue, rangoEtario, rubro) {
-  if (!territorio) return null;
+function techoConPoblacion(poblacion, plataformaValue, rangoEtario, rubro) {
   const familia = PLATFORM_FAMILIA[plataformaValue];
   const penetracion = familia ? PLATFORM_PENETRATION_OF_INTERNET[familia] : null;
   if (penetracion == null) return null;
   const pctEtario = rangoEtario ? rangoEtario.pct : 1;
   const factorRubro = rubro ? rubro.factor : 1;
-  return Math.round(territorio.poblacion * INTERNET_PENETRATION_PCT * penetracion * pctEtario * factorRubro);
+  return Math.round(poblacion * INTERNET_PENETRATION_PCT * penetracion * pctEtario * factorRubro);
+}
+
+// Devuelve el techo de personas alcanzables para esa plataforma en esa
+// localidad (SAM), o null si no hay territorio declarado o la plataforma no
+// tiene familia de penetración conocida — en esos casos no se aplica recorte.
+export function techoPoblacional(territorio, plataformaValue, rangoEtario, rubro) {
+  if (!territorio) return null;
+  return techoConPoblacion(territorio.poblacion, plataformaValue, rangoEtario, rubro);
+}
+
+// Mismo cálculo que techoPoblacional() pero sobre la población total del
+// país en vez de una localidad — el "Universo" (TAM) de esa plataforma a
+// nivel nacional, sin recorte geográfico.
+export function tamNacional(plataformaValue, rangoEtario, rubro) {
+  return techoConPoblacion(POBLACION_ARGENTINA_TOTAL_2026, plataformaValue, rangoEtario, rubro);
 }
 
 // Divide un techo (o cualquier número de personas alcanzables) entre

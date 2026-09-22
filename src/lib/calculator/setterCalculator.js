@@ -9,7 +9,8 @@ import { taxCalc } from '../../utils/tax.js';
 import { classifyText, findCategory, fuenteDeVerdad } from './kpiCatalog.js';
 import { BENCHMARKS, midpoint } from './benchmarks.js';
 import { findRubro } from '../../data/rubros.js';
-import { findTerritorio, findRangoEtario, techoPoblacional, desgloseIdentidad } from './territorio.js';
+import { findTerritorio, findRangoEtario, techoPoblacional, tamNacional, desgloseIdentidad } from './territorio.js';
+import { tagConfianza, ampliarRangoSiInterna } from './confianza.js';
 
 const ALL_PLATFORMS = PLATFORM_GROUPS.flatMap((g) => g.items);
 const PACING_BLOQUES = ['25%', '50%', '75%', '100%'];
@@ -193,22 +194,50 @@ export function calculateSetterResult(fields) {
       })
       : null;
 
-    // El número "agregado" de arriba también se recorta contra el mayor
-    // techo poblacional entre las plataformas seleccionadas — evita que la
-    // proyección diga, por ejemplo, más seguidores que gente vive en la zona.
-    if (alcancePersonas && territorioObj && plataformas.length > 0) {
-      const techos = plataformas
-        .map((p) => techoPoblacional(territorioObj, p, rangoEtarioObj, rubroObj))
-        .filter((t) => t != null);
-      if (techos.length > 0) {
-        const techoTop = Math.max(...techos);
-        if (max > techoTop) {
-          max = techoTop;
-          if (min > max) min = max;
-          meta += ` Limitado por el techo poblacional de ${territorioObj.label} (~${techoTop.toLocaleString('es-AR')} personas alcanzables).`;
+    // TAM (universo nacional) y SAM (techo de la localidad) — el mayor
+    // entre las plataformas seleccionadas, mismo criterio que el desglose
+    // por plataforma de arriba. El SOM (proyección final) se recorta contra
+    // el SAM para que nunca diga, por ejemplo, más seguidores que gente
+    // vive en la zona.
+    let tam = null;
+    let sam = null;
+    let wasCapped = false;
+    if (alcancePersonas && plataformas.length > 0) {
+      const tams = plataformas.map((p) => tamNacional(p, rangoEtarioObj, rubroObj)).filter((t) => t != null);
+      if (tams.length > 0) tam = Math.max(...tams);
+      if (territorioObj) {
+        const techos = plataformas.map((p) => techoPoblacional(territorioObj, p, rangoEtarioObj, rubroObj)).filter((t) => t != null);
+        if (techos.length > 0) {
+          sam = Math.max(...techos);
+          if (max > sam) {
+            max = sam;
+            if (min > max) min = max;
+            wasCapped = true;
+            meta += ` Limitado por el techo poblacional de ${territorioObj.label} (~${sam.toLocaleString('es-AR')} personas alcanzables).`;
+          }
         }
       }
     }
+
+    // Confianza: la cadena poblacional (INDEC + DataReportal) es alta
+    // confianza salvo que el rubro declarado la contamine (su factor no
+    // tiene fuente externa) — ver src/lib/calculator/confianza.js. El SOM
+    // solo hereda esa confianza si el techo poblacional fue lo que
+    // realmente determinó el número mostrado; si no, es una estimación de
+    // benchmark de mercado interno.
+    const chainKey = rubroObj ? 'ESTIMACION_INTERNA' : 'POBLACION_PLATAFORMA';
+    const confianzaTam = tam != null ? tagConfianza(chainKey) : null;
+    const confianzaSam = sam != null ? tagConfianza(chainKey) : null;
+    const confianzaSom = tagConfianza(wasCapped ? chainKey : 'ESTIMACION_INTERNA');
+
+    const desgloseIdentidadPreWidening = alcancePersonas ? desgloseIdentidad(max, rubroObj) : null;
+    const { min: somMinAmpliado, max: somMaxAmpliado } = ampliarRangoSiInterna(min, max, confianzaSom);
+    // El ensanchado por confianza nunca puede superar el techo poblacional
+    // (SAM) — ensanchar hacia arriba de esa cifra rompería el embudo
+    // TAM→SAM→SOM y podría hacer que comercial venda algo demográficamente
+    // inalcanzable, justo lo que este indicador existe para evitar.
+    const somMax = sam != null ? Math.min(somMaxAmpliado, sam) : somMaxAmpliado;
+    const somMin = Math.min(somMinAmpliado, somMax);
 
     const texto = pedido.texto;
     return {
@@ -218,13 +247,17 @@ export function calculateSetterResult(fields) {
       formula: category.formula,
       fuente_verdad: fuenteDeVerdad(plataformaLabels),
       meta_realista: meta,
-      proyeccion_min: min,
-      proyeccion_max: max,
+      proyeccion_min: somMin,
+      proyeccion_max: somMax,
       agresividad_pct: agresividadPct(category),
       territorio: territorioObj?.label || null,
       rubro: rubroObj?.label || null,
       por_plataforma: porPlataforma,
-      desglose_identidad: alcancePersonas ? desgloseIdentidad(max, rubroObj) : null,
+      desglose_identidad: desgloseIdentidadPreWidening,
+      tam,
+      sam,
+      som: { min: somMin, max: somMax },
+      confianza: { tam: confianzaTam, sam: confianzaSam, som: confianzaSom },
     };
   });
 

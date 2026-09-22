@@ -1,12 +1,14 @@
-# Territorios — techo poblacional por localidad y plataforma
+# Territorios — TAM/SAM/SOM y techo poblacional por localidad y plataforma
 
-Referencia exhaustiva de `src/data/territorios.js`, `src/data/rangosEtarios.js`,
-`src/data/rubros.js` y `src/lib/calculator/territorio.js` — el mecanismo que
-evita que la calculadora proyecte más "personas alcanzadas" o "seguidores"
-que la cantidad de gente que realmente vive en la zona declarada. Nace de un
-caso real: un cliente de Mar del Plata pidiendo alcance, donde una
-estimación puramente basada en presupuesto/CPM podía sugerir un número
-mayor a lo plausible para esa localidad.
+Referencia exhaustiva de `src/data/territorios.js`, `src/data/argentina.js`,
+`src/data/rangosEtarios.js`, `src/data/rubros.js`,
+`src/lib/calculator/territorio.js` y `src/lib/calculator/confianza.js` — el
+mecanismo que evita que la calculadora proyecte más "personas alcanzadas" o
+"seguidores" que la cantidad de gente que realmente vive en la zona
+declarada, y que expone cuán confiable es cada número. Nace de un caso
+real: un cliente de Mar del Plata pidiendo alcance, donde una estimación
+puramente basada en presupuesto/CPM podía sugerir un número mayor a lo
+plausible para esa localidad.
 
 ## Por qué existe
 
@@ -16,11 +18,19 @@ vive la audiencia — sin un techo, nada impide que el resultado supere la
 población real de una ciudad chica. El "techo poblacional" es un límite
 superior adicional: `min(proyección_por_presupuesto, techo_poblacional)`.
 
+Ese techo se expone como un embudo **TAM → SAM → SOM** (ver [reference:
+schema de salida](output-schema.md#tam--sam--som--confianza) para el shape
+exacto) para que comercial vea no solo el número final, sino de dónde sale
+y qué tan angosto o ancho es el margen de error — el objetivo explícito es
+que nunca se venda algo demográficamente inalcanzable, ni se proyecte tan
+corto que se deje plata sobre la mesa.
+
 ## De dónde sale cada número (y qué tan sólido es)
 
 | Dato | Fuente | Solidez |
 |---|---|---|
-| Población por localidad (`territorios.js`) | INDEC, Censo Nacional de Población, Hogares y Viviendas 2022 (aglomerados urbanos, vía REDATAM) | Alta — dato oficial |
+| Población por localidad (`territorios.js`) | Base: INDEC, Censo Nacional de Población, Hogares y Viviendas 2022 (aglomerados urbanos, vía REDATAM). Actualizada a 2026 — ver [Actualización de población a 2026](#actualización-de-población-a-2026) abajo | Alta — dato oficial |
+| Población total del país (`argentina.js`, `POBLACION_ARGENTINA_TOTAL_2026`) | INDEC, "Estimaciones de población por departamento" 2022-2035 (proyección intercensal oficial, publicada feb. 2026) | Alta — dato oficial |
 | Penetración de internet en Argentina (90,6%) | DataReportal, "Digital 2026: Argentina" (oct. 2025) | Alta — reporte de la industria, actualizado |
 | Penetración de cada plataforma (`territorio.js`, sobre base de usuarios de internet) | Mismo reporte DataReportal | Alta, con una simplificación: Meta (Instagram+Facebook combinados) usa el mayor de los dos individualmente como proxy, no la suma — sumarlos sobreestimaría por gente que usa ambas |
 | Pirámide etaria (`rangosEtarios.js`) | INDEC Censo 2022, vía un agregador secundario que cita el censo (no se pudo leer la tabla oficial de INDEC directamente — está en PDFs escaneados) | Media — tratar como estimación de trabajo, no exacta al decimal |
@@ -29,10 +39,40 @@ superior adicional: `min(proyección_por_presupuesto, techo_poblacional)`.
 **Nunca tratar el factor de rubro con la misma confianza que la población o
 la penetración de plataforma.** Si el equipo comercial junta datos reales
 (ej. tasa de interés medida en campañas ya corridas), actualizar
-`rubros.js` — es el único de los cuatro data files sin respaldo externo.
+`rubros.js` — es el único de los data files sin respaldo externo.
 `rubros.js` también trae `pctNominizado` por rubro (ver [Desglose
 anonimizado/nominizado](#desglose-anonimizado--nominizado) más abajo) — misma
-solidez baja, mismo aviso.
+solidez baja, mismo aviso. Esta tabla es exactamente lo que
+`src/lib/calculator/confianza.js` codifica como `nivel: 'alta'` vs.
+`nivel: 'interna'` — cualquier número que dependa del factor de rubro hereda
+`'interna'` aunque el resto de la cadena (población, penetración) sea de
+fuente alta, y el rango que se muestra se ensancha en consecuencia (ver
+[reference: schema de salida](output-schema.md#tam--sam--som--confianza)).
+
+## Actualización de población a 2026
+
+El Censo 2022 crudo (aglomerados, vía REDATAM) no se reemplaza ciudad por
+ciudad — INDEC no publicó un nuevo censo, solo una **proyección
+intercensal por departamento** (`base_estimaciones_pob_deptos_2022_2035.csv`,
+`censo.gob.ar/wp-content/uploads/2026/02/`, por departamento/año/sexo,
+2022–2035). Esa fuente es más gruesa que nuestros aglomerados: un
+departamento puede contener varias localidades ya cargadas (ej. Punilla en
+Córdoba = Villa Carlos Paz + Cosquín + La Falda), y varios de nuestros
+aglomerados "Gran X" abarcan **más de un** departamento INDEC (ej. "Gran
+Córdoba" ≠ el departamento "Capital" de Córdoba, que es mucho más chico —
+743.340 vs. 1.705.741 habitantes en 2022). Mapear cada aglomerado a "su"
+departamento uno a uno no es verificable sin introducir error nuevo.
+
+Por eso se usó un **ratio de crecimiento nacional único**, no
+per-departamento: `46.466.688 / 46.135.579 = 1,007177` (población total del
+país, 2026 vs. 2022, misma fuente), aplicado a las 164 cifras de
+`territorios.js` tal como estaban. Es menos preciso que un ajuste
+departamento por departamento *que fuera confiable* — pero un ratio
+nacional aplicado de forma pareja es más seguro que un mapeo manual
+propenso a error en el sentido incorrecto. `POBLACION_ARGENTINA_TOTAL_2026`
+(`src/data/argentina.js`) — la suma de todos los departamentos para 2026 de
+la misma fuente — es también el número que usa `tamNacional()` como base
+del TAM cuando no hay territorio declarado.
 
 ## Rubro: por pedido, no global — con autocompletado
 
@@ -131,7 +171,17 @@ los datos de un cliente de Comunidad identifican personas o no) — el
 desglose acá aplica a cualquier cliente, es sobre la proyección, no sobre
 el cliente en sí.
 
+## El SOM nunca es un compromiso
+
+`KpiCards.jsx` muestra, debajo de cada tarjeta, un disclaimer fijo:
+*"Proyección de planificación interna, no es un compromiso — no reemplaza
+el historial real de la cuenta del cliente."* — independientemente de la
+confianza del número. El indicador de confianza (badge junto a la
+"Proyección") y el disclaimer son dos mecanismos distintos: uno dice qué
+tan sólida es la fuente, el otro recuerda que ninguna proyección reemplaza
+el resultado real de una campaña ya corrida.
+
 ## Ver también
 
 - [reference: calculadora](calculator.md) — categorías, benchmarks, `modo` de proyección.
-- [reference: schema de salida](output-schema.md) — shape completo de `kpis[].por_plataforma` y `desglose_identidad`.
+- [reference: schema de salida](output-schema.md) — shape completo de `kpis[].por_plataforma`, `desglose_identidad` y `tam`/`sam`/`som`/`confianza`.

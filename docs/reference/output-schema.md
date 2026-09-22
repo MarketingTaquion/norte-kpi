@@ -36,7 +36,15 @@ consumidores.
       "por_plataforma": [
         { "plataforma": "string", "proyeccion_min": 0, "proyeccion_max": 0, "techo_poblacional": "number o null" }
       ],
-      "desglose_identidad": { "anonimizado": 0, "nominizado": 0 }
+      "desglose_identidad": { "anonimizado": 0, "nominizado": 0 },
+      "tam": "number o null — universo nacional para ese pedido (sin recorte geográfico)",
+      "sam": "number o null — techo poblacional de la localidad declarada (null sin territorio)",
+      "som": { "min": 0, "max": 0 },
+      "confianza": {
+        "tam": { "nivel": "alta | interna", "fuente": "string", "label": "string" },
+        "sam": { "nivel": "alta | interna", "fuente": "string", "label": "string" },
+        "som": { "nivel": "alta | interna", "fuente": "string", "label": "string" }
+      }
     }
   ],
   "pacing": [
@@ -72,6 +80,35 @@ de dónde sale el techo poblacional que recorta `alcance`/`seguidores`, qué
 plataformas tienen techo aplicable, por qué `por_plataforma` existe (una
 fila por plataforma seleccionada, con el neto dividido en partes iguales
 entre ellas), y qué representa `desglose_identidad`.
+
+### `tam` / `sam` / `som` / `confianza`
+
+Solo se calculan para categorías de tipo alcance/audiencia (ver
+`esAlcancePersonas()` en `setterCalculator.js`) — en el resto son `null`.
+Forman un embudo TAM → SAM → SOM:
+
+- **`tam`** (Total Addressable Market): universo nacional de esa
+  plataforma/rango etario/rubro, sin recortar por territorio — `null` si
+  no hay al menos una plataforma con familia de penetración conocida.
+- **`sam`** (Serviceable Addressable Market): el mismo cálculo, pero
+  recortado a la localidad declarada — `null` sin territorio.
+- **`som`** (Serviceable Obtainable Market): `{ min, max }`, el rango
+  final mostrado como "Proyección" (mismos valores que
+  `proyeccion_min`/`proyeccion_max`, que se mantienen por compatibilidad).
+  **`som.max` nunca supera `sam`** — ni siquiera el ensanchado de rango por
+  baja confianza (ver abajo) puede llevar el número más allá del techo
+  demográfico real, porque eso rompería el propósito del embudo (evitar que
+  comercial venda algo inalcanzable).
+- **`confianza`**: un `{ nivel, fuente, label }` por cada uno de los tres.
+  `nivel: 'alta'` = cadena poblacional con fuente externa citable (INDEC +
+  DataReportal); `nivel: 'interna'` = el número depende del factor de rubro
+  (`rubros.js`), que no tiene fuente externa — ver [reference:
+  territorios](territorios.md#de-dónde-sale-cada-número-y-qué-tan-sólido-es).
+  Cuando `som.confianza.nivel === 'interna'`, el rango `som` se ensancha
+  ±15% adicional respecto al cálculo crudo (`ampliarRangoSiInterna()` en
+  `confianza.js`) — para que un rango angosto nunca aparezca en una pieza
+  sin fuente sólida detrás — pero siempre recortado contra `sam` como se
+  explicó arriba.
 
 ## Evaluador — `calculateEvaluatorResult()`
 
