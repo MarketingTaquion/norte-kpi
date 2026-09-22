@@ -909,6 +909,10 @@ input:focus, textarea:focus, select:focus {
   margin-top: 16px;
 }
 
+.kpi-card-grid-solo {
+  grid-template-columns: 1fr;
+}
+
 @media (max-width: 800px) {
   .kpi-card-grid { grid-template-columns: 1fr; }
 }

@@ -21,17 +21,17 @@ export default function KpiCards({ kpis }) {
             </div>
           ) : null}
 
-          <div className="kpi-card-grid">
+          <div className={k.tam != null || k.sam != null ? 'kpi-card-grid kpi-card-grid-solo' : 'kpi-card-grid'}>
             <div>
               <div className="kpi-card-col-label">Meta realista</div>
               <div className="kpi-card-meta">{k.meta_realista}</div>
               <div className="kpi-card-fuente">Fuente de verdad: {k.fuente_verdad}</div>
             </div>
-            <div>
-              <div className="kpi-card-col-label">Proyección</div>
-              <div className="kpi-card-proyeccion">{k.proyeccion_min} — {k.proyeccion_max}</div>
-              {k.tam == null && k.sam == null ? (
-                <>
+            {k.tam == null && k.sam == null ? (
+              <>
+                <div>
+                  <div className="kpi-card-col-label">Proyección</div>
+                  <div className="kpi-card-proyeccion">{k.proyeccion_min} — {k.proyeccion_max}</div>
                   <RangeMeter min={k.proyeccion_min} max={k.proyeccion_max} />
                   <div className="range-meter-labels">
                     <span>min</span><span>max</span>
@@ -41,18 +41,18 @@ export default function KpiCards({ kpis }) {
                       {k.confianza.som.label}
                     </div>
                   ) : null}
-                </>
-              ) : null}
-            </div>
-            <div className="kpi-card-gauge-col">
-              <div className="kpi-card-col-label" style={{ textAlign: 'center' }}>Agresividad</div>
-              <SeverityGauge
-                value={k.agresividad_pct}
-                lowLabel="Conservador"
-                highLabel="Agresivo"
-                levels={['Conservador', 'Moderado', 'Agresivo']}
-              />
-            </div>
+                </div>
+                <div className="kpi-card-gauge-col">
+                  <div className="kpi-card-col-label" style={{ textAlign: 'center' }}>Agresividad</div>
+                  <SeverityGauge
+                    value={k.agresividad_pct}
+                    lowLabel="Conservador"
+                    highLabel="Agresivo"
+                    levels={['Conservador', 'Moderado', 'Agresivo']}
+                  />
+                </div>
+              </>
+            ) : null}
           </div>
 
           {k.tam != null || k.sam != null ? (
