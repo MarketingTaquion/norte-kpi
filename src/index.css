@@ -591,62 +591,6 @@ input:focus, textarea:focus, select:focus {
 .tax-strip-value.accent { color: var(--tq-fucsia); }
 .tax-strip-value.strong { font-weight: var(--tq-weight-black); }
 
-/* --- Pacing tracker: línea + nodos, alternativa al grid de tarjetas --- */
-.pacing-tracker {
-  position: relative;
-}
-
-.pacing-tracker-line {
-  position: relative;
-  height: 4px;
-  border-radius: var(--tq-radius-full);
-  background: var(--tq-negro);
-  margin: 0 6px;
-}
-
-.pacing-tracker-nodes {
-  display: flex;
-  justify-content: space-between;
-  margin-top: -4px;
-}
-
-.pacing-tracker-node {
-  width: 25%;
-  text-align: center;
-}
-
-.pacing-tracker-dot {
-  display: block;
-  width: 10px;
-  height: 10px;
-  border-radius: var(--tq-radius-full);
-  background: var(--tq-negro);
-  margin: 0 auto 6px;
-}
-
-.pacing-tracker-pct {
-  font-size: 12px;
-  font-weight: var(--tq-weight-bold);
-}
-
-.pacing-tracker-meta {
-  font-size: 10px;
-  color: var(--tq-text-muted);
-  margin-top: 2px;
-}
-
-/* --- Checklist NSM + Próximos pasos, lado a lado --- */
-.checklist-pasos-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-bottom: var(--tq-space-3);
-}
-
-@media (max-width: 700px) {
-  .checklist-pasos-grid { grid-template-columns: 1fr; }
-}
-
 /* --- KPI cards: una tarjeta por pedido, reemplaza la tabla --- */
 .kpi-card {
   border: var(--tq-border-strong) solid var(--tq-line);
