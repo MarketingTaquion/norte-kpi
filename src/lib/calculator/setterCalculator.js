@@ -195,16 +195,17 @@ export function calculateSetterResult(fields) {
       })
       : null;
 
-    // TAM (universo nacional) y SAM (techo de la localidad) — el mayor
-    // entre las plataformas seleccionadas, mismo criterio que el desglose
-    // por plataforma de arriba. El SOM (proyección final) se recorta contra
-    // el SAM para que nunca diga, por ejemplo, más seguidores que gente
-    // vive en la zona.
+    // TAM (universo nacional, techo demográfico puro — sin territorio ni
+    // intereses) y SAM (TAM acotado por la localidad Y por el rubro/interés
+    // declarado, el mayor entre las plataformas seleccionadas, mismo
+    // criterio que el desglose por plataforma de arriba). El SOM
+    // (proyección final) se recorta contra el SAM para que nunca diga, por
+    // ejemplo, más seguidores que gente vive en la zona.
     let tam = null;
     let sam = null;
     let wasCapped = false;
     if (alcancePersonas && plataformas.length > 0) {
-      const tams = plataformas.map((p) => tamNacional(p, rangoEtarioObj, rubroObj)).filter((t) => t != null);
+      const tams = plataformas.map((p) => tamNacional(p, rangoEtarioObj)).filter((t) => t != null);
       if (tams.length > 0) tam = Math.max(...tams);
       if (territorioObj) {
         const techos = plataformas.map((p) => techoPoblacional(territorioObj, p, rangoEtarioObj, rubroObj)).filter((t) => t != null);
@@ -222,12 +223,14 @@ export function calculateSetterResult(fields) {
 
     // Confianza: la cadena poblacional (INDEC + DataReportal) es alta
     // confianza salvo que el rubro declarado la contamine (su factor no
-    // tiene fuente externa) — ver src/lib/calculator/confianza.js. El SOM
-    // solo hereda esa confianza si el techo poblacional fue lo que
-    // realmente determinó el número mostrado; si no, es una estimación de
-    // benchmark de mercado interno.
+    // tiene fuente externa) — ver src/lib/calculator/confianza.js. El TAM
+    // nunca depende de rubro (ver tamNacional en territorio.js), por eso es
+    // siempre "alta" a diferencia de SAM/SOM. El SOM solo hereda la
+    // confianza del techo poblacional si eso fue lo que realmente
+    // determinó el número mostrado; si no, es una estimación de benchmark
+    // de mercado interno.
     const chainKey = rubroObj ? 'ESTIMACION_INTERNA' : 'POBLACION_PLATAFORMA';
-    const confianzaTam = tam != null ? tagConfianza(chainKey) : null;
+    const confianzaTam = tam != null ? tagConfianza('POBLACION_PLATAFORMA') : null;
     const confianzaSam = sam != null ? tagConfianza(chainKey) : null;
     const confianzaSom = tagConfianza(wasCapped ? chainKey : 'ESTIMACION_INTERNA');
 

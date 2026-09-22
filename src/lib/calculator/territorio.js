@@ -79,9 +79,13 @@ export function techoPoblacional(territorio, plataformaValue, rangoEtario, rubro
 
 // Mismo cálculo que techoPoblacional() pero sobre la población total del
 // país en vez de una localidad — el "Universo" (TAM) de esa plataforma a
-// nivel nacional, sin recorte geográfico.
-export function tamNacional(plataformaValue, rangoEtario, rubro) {
-  return techoConPoblacion(POBLACION_ARGENTINA_TOTAL_2026, plataformaValue, rangoEtario, rubro);
+// nivel nacional. A propósito NUNCA recibe `rubro`: el TAM es un techo
+// demográfico puro (población × penetración × rango etario), sin recorte
+// de zona NI de intereses — son el SAM y el SOM los que lo acotan por
+// territorio e intereses, no el TAM. Por eso el TAM siempre es "alta
+// confianza" (ver setterCalculator.js).
+export function tamNacional(plataformaValue, rangoEtario) {
+  return techoConPoblacion(POBLACION_ARGENTINA_TOTAL_2026, plataformaValue, rangoEtario, null);
 }
 
 // Divide un techo (o cualquier número de personas alcanzables) entre

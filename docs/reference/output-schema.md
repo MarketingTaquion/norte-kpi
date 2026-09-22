@@ -90,10 +90,13 @@ Solo se calculan para categorías de tipo alcance/audiencia (ver
 Forman un embudo TAM → SAM → SOM → Comunidad:
 
 - **`tam`** (Total Addressable Market): universo nacional de esa
-  plataforma/rango etario/rubro, sin recortar por territorio — `null` si
-  no hay al menos una plataforma con familia de penetración conocida.
-- **`sam`** (Serviceable Addressable Market): el mismo cálculo, pero
-  recortado a la localidad declarada — `null` sin territorio.
+  plataforma/rango etario — techo demográfico puro, **nunca** recortado por
+  territorio ni por rubro/intereses (`tamNacional()` en `territorio.js` no
+  recibe `rubro` a propósito) — `null` si no hay al menos una plataforma
+  con familia de penetración conocida.
+- **`sam`** (Serviceable Addressable Market): el TAM, acotado por la
+  localidad declarada Y por el rubro/interés del pedido — `null` sin
+  territorio.
 - **`som`** (Serviceable Obtainable Market): `{ min, max }`, el rango
   final mostrado como "Proyección" (mismos valores que
   `proyeccion_min`/`proyeccion_max`, que se mantienen por compatibilidad).
@@ -114,15 +117,16 @@ Forman un embudo TAM → SAM → SOM → Comunidad:
 - **`confianza`**: un `{ nivel, fuente, label }` por cada uno de los
   cuatro. `nivel: 'alta'` = cadena poblacional con fuente externa citable
   (INDEC + DataReportal); `nivel: 'interna'` = el número depende de un
-  factor sin fuente externa (rubro para tam/sam/som, la tasa de captación
-  para comunidad) — ver [reference:
+  factor sin fuente externa (rubro para sam/som, la tasa de captación para
+  comunidad) — ver [reference:
   territorios](territorios.md#de-dónde-sale-cada-número-y-qué-tan-sólido-es).
-  `comunidad.confianza` es **siempre** `'interna'`. Cuando
-  `som.confianza.nivel === 'interna'`, el rango `som` se ensancha ±15%
-  adicional respecto al cálculo crudo (`ampliarRangoSiInterna()` en
-  `confianza.js`) — para que un rango angosto nunca aparezca en una pieza
-  sin fuente sólida detrás — pero siempre recortado contra `sam` como se
-  explicó arriba.
+  **`tam.confianza` es siempre `'alta'`** (nunca depende de rubro, ver
+  arriba) y **`comunidad.confianza` es siempre `'interna'`**; `sam`/`som`
+  varían según si hay rubro declarado. Cuando `som.confianza.nivel ===
+  'interna'`, el rango `som` se ensancha ±15% adicional respecto al cálculo
+  crudo (`ampliarRangoSiInterna()` en `confianza.js`) — para que un rango
+  angosto nunca aparezca en una pieza sin fuente sólida detrás — pero
+  siempre recortado contra `sam` como se explicó arriba.
 
 `desglose_identidad` (`{ anonimizado, nominizado }`) cuelga de
 `comunidad.max`, no de `som.max` — el split "¿dejó un dato identificable o

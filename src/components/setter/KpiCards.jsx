@@ -57,61 +57,70 @@ export default function KpiCards({ kpis }) {
 
           {k.tam != null || k.sam != null ? (
             <div className="kpi-card-funnel">
-              <div className="kpi-card-funnel-item">
-                <div className="kpi-card-col-label">Universo (TAM)</div>
-                <div className="kpi-card-funnel-valor">{k.tam != null ? k.tam.toLocaleString('es-AR') : '—'}</div>
+              <div className="kpi-card-funnel-tier">
+                <div>
+                  <div className="kpi-card-funnel-tier-label">Universo (TAM)</div>
+                  <div className="kpi-card-funnel-tier-sub">Techo demográfico puro</div>
+                </div>
+                <div className="kpi-card-funnel-tier-valor">{k.tam != null ? k.tam.toLocaleString('es-AR') : '—'}</div>
               </div>
-              <span className="kpi-card-funnel-arrow">→</span>
-              <div className="kpi-card-funnel-item">
-                <div className="kpi-card-col-label">Zona + intereses (SAM)</div>
-                <div className="kpi-card-funnel-valor">{k.sam != null ? k.sam.toLocaleString('es-AR') : '—'}</div>
+              <div className="kpi-card-funnel-chevron" aria-hidden="true">⌄</div>
+
+              <div className="kpi-card-funnel-tier kpi-card-funnel-tier-sam">
+                <div>
+                  <div className="kpi-card-funnel-tier-label">Zona + intereses (SAM)</div>
+                  <div className="kpi-card-funnel-tier-sub">TAM acotado por territorio e intereses</div>
+                </div>
+                <div className="kpi-card-funnel-tier-valor">{k.sam != null ? k.sam.toLocaleString('es-AR') : '—'}</div>
               </div>
-              <span className="kpi-card-funnel-arrow">→</span>
-              <div className="kpi-card-funnel-item">
-                <div className="kpi-card-col-label">Estimado (SOM)</div>
-                <div className="kpi-card-funnel-valor">{k.som.min.toLocaleString('es-AR')}–{k.som.max.toLocaleString('es-AR')}</div>
+              <div className="kpi-card-funnel-chevron" aria-hidden="true">⌄</div>
+
+              <div className="kpi-card-funnel-tier kpi-card-funnel-tier-som">
+                <div className="kpi-card-funnel-tier-label">Estimado (SOM)</div>
+                <div className="kpi-card-funnel-tier-valor-big">{k.som.min.toLocaleString('es-AR')}–{k.som.max.toLocaleString('es-AR')}</div>
+                <div className="kpi-card-funnel-tier-sub">Gente alcanzable por pauta</div>
               </div>
+
               {k.comunidad ? (
                 <>
-                  <span className="kpi-card-funnel-arrow">→</span>
-                  <div className="kpi-card-funnel-item kpi-card-funnel-item-comunidad">
-                    <div className="kpi-card-col-label">Comunidad</div>
-                    <div className="kpi-card-funnel-valor">{k.comunidad.min.toLocaleString('es-AR')}–{k.comunidad.max.toLocaleString('es-AR')}</div>
-                    <div className="kpi-card-funnel-nota">Grupo de WhatsApp vía ManyChat</div>
+                  <div className="kpi-card-funnel-chevron" aria-hidden="true">⌄</div>
+                  <div className="kpi-card-funnel-tier kpi-card-funnel-tier-comunidad">
+                    <div className="kpi-card-funnel-tier-label">Comunidad</div>
+                    <div className="kpi-card-funnel-tier-valor-big">{k.comunidad.min.toLocaleString('es-AR')}–{k.comunidad.max.toLocaleString('es-AR')}</div>
+                    <div className="kpi-card-funnel-tier-sub">Grupo de WhatsApp captado vía ManyChat</div>
+                    {k.confianza?.comunidad ? (
+                      <div className="kpi-card-funnel-fuente">
+                        <span className="kpi-card-funnel-fuente-dot" />
+                        <span className="kpi-card-funnel-fuente-aspecto">Tasa de captación ManyChat</span>
+                        <span className="kpi-card-funnel-fuente-detalle">— {k.confianza.comunidad.fuente}</span>
+                      </div>
+                    ) : null}
                   </div>
                 </>
               ) : null}
             </div>
           ) : null}
 
-          {k.confianza?.som || k.confianza?.comunidad ? (
-            <div className="kpi-card-confianza-row">
-              {k.confianza?.som ? (
-                <div className={`kpi-card-confianza kpi-card-confianza-${k.confianza.som.nivel}`}>
-                  SOM: {k.confianza.som.label}
-                </div>
-              ) : null}
-              {k.comunidad && k.confianza?.comunidad ? (
-                <div className={`kpi-card-confianza kpi-card-confianza-${k.confianza.comunidad.nivel}`}>
-                  Comunidad: {k.confianza.comunidad.label}
-                </div>
-              ) : null}
-            </div>
-          ) : null}
-
           {k.desglose_identidad ? (
-            <div className="kpi-card-identidad">
-              <div className="kpi-card-identidad-item">
-                <div className="kpi-card-col-label">Miembros anonimizados</div>
-                <div className="kpi-card-identidad-valor">{k.desglose_identidad.anonimizado.toLocaleString('es-AR')}</div>
-                <div className="kpi-card-identidad-nota">En el grupo, sin dato identificable más allá del teléfono</div>
+            <>
+              <div className="kpi-card-identidad">
+                <div className="kpi-card-identidad-item">
+                  <div className="kpi-card-col-label">Miembros anonimizados</div>
+                  <div className="kpi-card-identidad-valor">{k.desglose_identidad.anonimizado.toLocaleString('es-AR')}</div>
+                  <div className="kpi-card-identidad-nota">En el grupo, sin dato identificable más allá del teléfono</div>
+                </div>
+                <div className="kpi-card-identidad-item">
+                  <div className="kpi-card-col-label">Miembros nominizados</div>
+                  <div className="kpi-card-identidad-valor">{k.desglose_identidad.nominizado.toLocaleString('es-AR')}</div>
+                  <div className="kpi-card-identidad-nota">Se identificaron — CRM, formulario del flujo</div>
+                </div>
               </div>
-              <div className="kpi-card-identidad-item">
-                <div className="kpi-card-col-label">Miembros nominizados</div>
-                <div className="kpi-card-identidad-valor">{k.desglose_identidad.nominizado.toLocaleString('es-AR')}</div>
-                <div className="kpi-card-identidad-nota">Se identificaron — CRM, formulario del flujo</div>
+              <div className="kpi-card-funnel-fuente kpi-card-funnel-fuente-identidad">
+                <span className="kpi-card-funnel-fuente-dot" />
+                <span className="kpi-card-funnel-fuente-aspecto">Split anonimizado/nominizado</span>
+                <span className="kpi-card-funnel-fuente-detalle">— Estimación interna (Taquion), % por rubro</span>
               </div>
-            </div>
+            </>
           ) : null}
 
           {k.por_plataforma && k.por_plataforma.length > 0 ? (
