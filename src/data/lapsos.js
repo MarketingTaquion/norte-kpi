@@ -1,13 +1,8 @@
-// 10 lapsos predefinidos, de Semana 1 a Año completo.
+// Único lapso predefinido: la Temporada 1 del playbook de Comunidad (9
+// meses) — ver src/data/comunidadPlaybook.js para las 5 etapas del
+// recorrido dentro de ese ciclo (Detectar → Entender → Diseñar → Activar →
+// Crecer). El otro modo del selector de período ("Fechas custom") sigue
+// disponible para proyectar cualquier rango de fechas fuera de este ciclo.
 export const LAPSOS = [
-  { value: 'semana-1', label: 'Semana 1', dias: 7 },
-  { value: 'semana-2', label: 'Semana 2', dias: 14 },
-  { value: 'quincena', label: 'Quincena', dias: 15 },
-  { value: 'mes-1', label: 'Mes 1', dias: 30 },
-  { value: 'mes-2', label: 'Mes 2', dias: 60 },
-  { value: 'mes-3', label: 'Mes 3 (trimestre)', dias: 90 },
-  { value: 'semestre-1', label: 'Semestre 1', dias: 180 },
-  { value: 'semestre-2', label: 'Semestre 2', dias: 180 },
-  { value: 'q4', label: 'Último trimestre', dias: 90 },
-  { value: 'anio-completo', label: 'Año completo', dias: 365 },
+  { value: 'temporada-1', label: '9 meses · Temporada 1', dias: 270 },
 ];

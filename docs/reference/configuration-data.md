@@ -45,21 +45,23 @@ cosa: elegir la `fuente_verdad` de cada KPI (`fuenteDeVerdad()` en
 
 ## `src/data/lapsos.js` — `LAPSOS`
 
-10 lapsos predefinidos, cada uno `{ value, label, dias }`:
+Un único lapso predefinido, `{ value, label, dias }`:
 
 | value | label | días |
 |---|---|---|
-| `semana-1` | Semana 1 | 7 |
-| `semana-2` | Semana 2 | 14 |
-| `quincena` | Quincena | 15 |
-| `mes-1` | Mes 1 | 30 |
-| `mes-2` | Mes 2 | 60 |
-| `mes-3` | Mes 3 (trimestre) | 90 |
-| `semestre-1` | Semestre 1 | 180 |
-| `semestre-2` | Semestre 2 | 180 |
-| `q4` | Último trimestre | 90 |
-| `anio-completo` | Año completo | 365 |
+| `temporada-1` | 9 meses · Temporada 1 | 270 |
 
+Representa la Temporada 1 del playbook de producto "Comunidad" (9 meses).
 El campo `dias` **sí se usa** para calcular el pacing: `diasDelPeriodo()` en
 `setterCalculator.js` lo lee para ubicar cada bloque de 25/50/75/100% en un
-día concreto del período (ej. "Día 8" para el 25% de un `mes-1`).
+día concreto del período. El otro modo del selector de período ("Fechas
+custom") sigue disponible para proyectar cualquier rango de fechas fuera de
+este ciclo.
+
+## `src/data/comunidadPlaybook.js` — `COMUNIDAD_PLAYBOOK_STAGES`
+
+Las 5 etapas del recorrido del playbook de Comunidad dentro de la
+Temporada 1 — Detectar → Entender → Diseñar → Activar → Crecer, cada una
+`{ name, goal, dur }`. Se muestran como contexto informativo en el paso
+"¿Qué período vamos a proyectar?" del wizard (`PeriodPicker.jsx`) — no
+alimentan ningún cálculo, son puramente explicativas.

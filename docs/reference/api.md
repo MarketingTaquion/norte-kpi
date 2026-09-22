@@ -62,8 +62,8 @@ X-Api-Key: <NORTE_API_KEY>
 |---|---|---|---|
 | `cliente` | `string` | **Sí** | Nombre libre, no necesita matchear `src/data/clients.js` |
 | `pedidos` | `string[]` \| `{ texto: string, categoria: string, rubro?: string }[]` | **Sí** (mín. 1 no vacío) | Pedidos en lenguaje coloquial. El wizard siempre manda `{ texto, categoria, rubro }` — `categoria` es un value de [`CATEGORY_OPTIONS`](calculator.md) (ej. `"leads"`) y fija la fórmula/benchmark sin adivinar; `rubro` es un value de [`RUBROS`](../../src/data/rubros.js) (ej. `"gastronomia"`, opcional, por pedido — no global) y afina el techo poblacional de ESE pedido. Un string plano sigue soportado para integraciones que no manden `categoria`/`rubro` — se clasifican por keywords con `classifyText()`/`classifyRubro()` |
-| `etapas` | `string[]` | No | Values de [`STAGES`](configuration-data.md#srcdatastagesjs--stages) (ej. `"comunidad-captacion"`) |
-| `periodo` | `{ lapso: string }` \| `{ desde: string, hasta: string }` | No | `lapso` es un value de [`LAPSOS`](configuration-data.md#srcdatalapsosjs--lapsos) (ej. `"mes-1"`); `desde`/`hasta` son fechas `YYYY-MM-DD` |
+| `etapas` | `string[]` | No | Values de [`STAGES`](configuration-data.md#srcdatastagesjs--stages) (ej. `"setup-tracking"`) |
+| `periodo` | `{ lapso: string }` \| `{ desde: string, hasta: string }` | No | `lapso` es un value de [`LAPSOS`](configuration-data.md#srcdatalapsosjs--lapsos) (hoy solo `"temporada-1"`); `desde`/`hasta` son fechas `YYYY-MM-DD` |
 | `presupuesto` | `number` | No | Bruto. Si se omite, se devuelven rangos de benchmark referenciales sin Tax Check. El wizard solo ofrece `5000000`, `10000000` o `12000000` (o vacío) vía [`PRESUPUESTO_OPTIONS`](../../src/data/presupuestos.js) — pero la API/la calculadora no validan ese límite, cualquier número positivo es aceptado |
 | `moneda` | `"ARS"` \| `"USD"` | No | Default `"ARS"` |
 | `plataformas` | `string[]` | No | Values de [`PLATFORM_GROUPS`](configuration-data.md#srcdataplatformsjs--platform_groups) (ej. `"meta-ads"`). Si hay ≥1, cada `kpi` del resultado trae un desglose `por_plataforma` (neto dividido en partes iguales entre ellas) |
@@ -77,8 +77,8 @@ Ejemplo:
 {
   "cliente": "Acme SRL",
   "pedidos": [{ "texto": "Quiero más leads calificados para el equipo comercial", "categoria": "leads", "rubro": "servicios-profesionales" }],
-  "etapas": ["comunidad-captacion"],
-  "periodo": { "lapso": "mes-1" },
+  "etapas": ["setup-tracking"],
+  "periodo": { "lapso": "temporada-1" },
   "presupuesto": 1000000,
   "moneda": "ARS",
   "plataformas": ["meta-ads", "google-ads"],
