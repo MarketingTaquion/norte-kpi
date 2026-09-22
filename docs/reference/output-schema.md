@@ -36,6 +36,7 @@ consumidores.
         { "plataforma": "string", "proyeccion_min": 0, "proyeccion_max": 0, "techo_poblacional": "number o null" }
       ],
       "desglose_identidad": { "anonimizado": 0, "nominizado": 0 },
+      "es_proyeccion_personas": "boolean — true si esta categoría proyecta personas/unidades (alcance, seguidores, leads, tráfico); condiciona si tam/sam/som/comunidad son number o null",
       "tam": "number o null — universo nacional para ese pedido (sin recorte geográfico)",
       "sam": "number o null — techo poblacional de la localidad declarada (null sin territorio)",
       "som": { "min": 0, "max": 0 },
@@ -84,9 +85,13 @@ el neto dividido en partes iguales entre ellas).
 
 ### `tam` / `sam` / `som` / `comunidad` / `confianza`
 
-Solo se calculan para categorías de tipo alcance/audiencia (ver
-`esAlcancePersonas()` en `setterCalculator.js`) — en el resto son `null`.
-Forman un embudo TAM → SAM → SOM → Comunidad:
+Se calculan para categorías cuyo número representa una cantidad real de
+personas/unidades alcanzadas: **alcance, seguidores, leads y tráfico** (ver
+`esProyeccionDePersonas()` en `setterCalculator.js`) — en el resto (ventas/
+ROAS, engagement, retención, conversión, setup) son `null`, porque ahí el
+número es un ratio, un % o un hito binario, no un conteo que tenga sentido
+recortar contra población o convertir a miembros de comunidad. Forman un
+embudo TAM → SAM → SOM → Comunidad:
 
 - **`tam`** (Total Addressable Market): universo nacional de esa
   plataforma/rango etario — techo demográfico puro, **nunca** recortado por

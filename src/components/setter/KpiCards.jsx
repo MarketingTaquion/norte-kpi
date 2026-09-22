@@ -78,7 +78,7 @@ export default function KpiCards({ kpis }) {
               <div className="kpi-card-funnel-tier kpi-card-funnel-tier-som">
                 <div className="kpi-card-funnel-tier-label">Estimado (SOM)</div>
                 <div className="kpi-card-funnel-tier-valor-big">{k.som.min.toLocaleString('es-AR')}–{k.som.max.toLocaleString('es-AR')}</div>
-                <div className="kpi-card-funnel-tier-sub">Gente alcanzable por pauta</div>
+                <div className="kpi-card-funnel-tier-sub">Recortado por el techo poblacional de la zona</div>
               </div>
 
               {k.comunidad ? (

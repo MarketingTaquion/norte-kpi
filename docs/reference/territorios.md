@@ -123,11 +123,13 @@ comentario de cabecera de `territorios.js`):
 
 ## Cómo se aplica el recorte
 
-Solo se aplica a categorías cuyo número representa personas/audiencia — no
-a plata, leads, clics ni porcentajes. Hoy son exactamente dos: `alcance`
-(modo `'alcance'` en `kpiCatalog.js`) y `seguidores` (KPI técnico
-"Crecimiento de audiencia"). Ver `esAlcancePersonas()` en
-`setterCalculator.js`.
+Solo se aplica a categorías cuyo número representa un conteo real de
+personas/unidades — no a un ratio (ROAS), un % (engagement, retención,
+conversión) ni un hito binario (setup). Hoy son cuatro: `alcance` (modo
+`'alcance'` en `kpiCatalog.js`), `seguidores` (KPI técnico "Crecimiento de
+audiencia"), y `leads`/`tráfico` (modo `'costo_por_unidad'` — son unidades
+contables igual que las personas alcanzadas, así que también entran al
+embudo). Ver `esProyeccionDePersonas()` en `setterCalculator.js`.
 
 Plataformas sin familia de penetración conocida (Programática, Mercado Ads,
 Email marketing, Influencers, PR/Prensa, Eventos) no tienen techo aplicable
@@ -171,7 +173,7 @@ TAM/SAM/SOM — ver el comentario de `src/data/comunidad.js`.
 
 ## Desglose anonimizado / nominizado
 
-Cada `kpi` de tipo alcance/seguidores también trae `desglose_identidad:
+Cada `kpi` de tipo alcance/seguidores/leads/tráfico también trae `desglose_identidad:
 { anonimizado, nominizado }` (o `null` sin `comunidad.max`). Divide el
 `comunidad.max` en dos — **no** el `som.max`: el split "¿dejó un dato
 identificable o no?" solo tiene sentido una vez que la persona ya es

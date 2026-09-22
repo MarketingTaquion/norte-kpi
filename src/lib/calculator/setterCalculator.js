@@ -109,12 +109,19 @@ function agresividadPct(category) {
   return Math.round(Math.min(100, (Math.log(ratio) / Math.log(AGRESIVIDAD_RATIO_MAX)) * 100));
 }
 
-// Categorías cuyo número representa personas/audiencia (no plata, leads,
-// clics ni un %) — son las que se recortan contra el techo poblacional del
-// territorio para no proyectar más "alcance" o "seguidores" que gente vive
-// en la zona. Ver src/lib/calculator/territorio.js.
-function esAlcancePersonas(category) {
-  return category.modo === 'alcance' || category.key === 'seguidores';
+// Categorías cuyo número representa una cantidad real de personas/unidades
+// alcanzadas — alcance/seguidores (personas), leads/tráfico (unidades
+// contables, `modo: 'costo_por_unidad'`). Son las que se recortan contra el
+// techo poblacional del territorio y alimentan el embudo TAM/SAM/SOM/
+// Comunidad, para no proyectar más gente/unidades que la que vive en la
+// zona. Deliberadamente NO incluye: `roas` (plata, no personas — capear
+// ingresos contra población no tiene sentido), `porcentaje` (engagement,
+// retención, conversión — una tasa no es un conteo, y calcularle
+// "Comunidad" produciría un número sin sentido) ni `hito` (setup —
+// completado/no completado, no hay volumen que recortar). Ver
+// src/lib/calculator/territorio.js.
+function esProyeccionDePersonas(category) {
+  return category.modo === 'alcance' || category.modo === 'costo_por_unidad' || category.key === 'seguidores';
 }
 
 function inferirNsm(kpis, nsmDeclarada) {
@@ -176,16 +183,18 @@ export function calculateSetterResult(fields) {
     const category = findCategory(pedido.categoria) || classifyText(pedido.texto);
     const rubroObj = findRubro(pedido.rubro);
     const sop = setupForzado && category.sop !== 'SOP Ignite' ? 'SOP Setup' : category.sop;
-    const alcancePersonas = esAlcancePersonas(category);
+    const proyeccionDePersonas = esProyeccionDePersonas(category);
     let { min, max, meta } = proyectarKpi(category, netoPorPedido);
 
     // Desglose por plataforma — cada plataforma seleccionada se lleva una
     // porción igual del neto, y (si aplica) su propio techo poblacional.
+    // El techo aplica a alcance/seguidores/leads/tráfico (conteos reales de
+    // gente/unidades) — no a ROAS (plata), porcentajes ni al hito de setup.
     const porPlataforma = plataformas.length > 0
       ? plataformas.map((platValue) => {
         const platLabel = ALL_PLATFORMS.find((p) => p.value === platValue)?.label || platValue;
         const { min: pMin, max: pMax } = proyectarKpi(category, netoPorPlataforma);
-        const techo = alcancePersonas ? techoPoblacional(territorioObj, platValue, rangoEtarioObj, rubroObj) : null;
+        const techo = proyeccionDePersonas ? techoPoblacional(territorioObj, platValue, rangoEtarioObj, rubroObj) : null;
         return {
           plataforma: platLabel,
           proyeccion_min: techo != null ? Math.min(pMin, techo) : pMin,
@@ -200,11 +209,14 @@ export function calculateSetterResult(fields) {
     // declarado, el mayor entre las plataformas seleccionadas, mismo
     // criterio que el desglose por plataforma de arriba). El SOM
     // (proyección final) se recorta contra el SAM para que nunca diga, por
-    // ejemplo, más seguidores que gente vive en la zona.
+    // ejemplo, más seguidores o más leads que gente vive en la zona. Se
+    // calcula para alcance/seguidores/leads/tráfico — no para ROAS
+    // (plata), porcentajes ni el hito de setup, donde no hay conteo de
+    // personas/unidades que recortar contra población.
     let tam = null;
     let sam = null;
     let wasCapped = false;
-    if (alcancePersonas && plataformas.length > 0) {
+    if (proyeccionDePersonas && plataformas.length > 0) {
       const tams = plataformas.map((p) => tamNacional(p, rangoEtarioObj)).filter((t) => t != null);
       if (tams.length > 0) tam = Math.max(...tams);
       if (territorioObj) {
@@ -242,18 +254,21 @@ export function calculateSetterResult(fields) {
     const somMax = sam != null ? Math.min(somMaxAmpliado, sam) : somMaxAmpliado;
     const somMin = Math.min(somMinAmpliado, somMax);
 
-    // Comunidad: de todo el SOM (gente alcanzable por pauta), cuántos se
+    // Comunidad: de todo el SOM (gente/unidades alcanzables), cuántos se
     // terminan uniendo al grupo de WhatsApp que arma el flujo de ManyChat
     // de ese cliente — un escalón más del embudo, distinto en naturaleza a
     // TAM/SAM/SOM (mide conversión/comportamiento, no techo de audiencia).
-    // Siempre 'interna': no hay fuente externa para esta tasa todavía — ver
+    // Mismo criterio que el resto del embudo: solo aplica a categorías de
+    // personas/unidades (alcance, seguidores, leads, tráfico) — convertir
+    // un ROAS o un % de engagement "a comunidad" no tiene sentido. Siempre
+    // 'interna': no hay fuente externa para esta tasa todavía — ver
     // src/data/comunidad.js. El desglose anonimizado/nominizado (¿el
     // miembro dejó un dato identificable, ej. CRM, o no?) solo tiene
     // sentido una vez que la persona ya es miembro del grupo, por eso
     // cuelga de Comunidad y no del SOM.
-    const comunidadMin = alcancePersonas ? Math.round(somMin * TASA_CAPTACION_COMUNIDAD) : null;
-    const comunidadMax = alcancePersonas ? Math.round(somMax * TASA_CAPTACION_COMUNIDAD) : null;
-    const confianzaComunidad = alcancePersonas ? tagConfianza('ESTIMACION_INTERNA') : null;
+    const comunidadMin = proyeccionDePersonas ? Math.round(somMin * TASA_CAPTACION_COMUNIDAD) : null;
+    const comunidadMax = proyeccionDePersonas ? Math.round(somMax * TASA_CAPTACION_COMUNIDAD) : null;
+    const confianzaComunidad = proyeccionDePersonas ? tagConfianza('ESTIMACION_INTERNA') : null;
     const desgloseIdentidadComunidad = comunidadMax != null ? desgloseIdentidad(comunidadMax, rubroObj) : null;
 
     const texto = pedido.texto;
@@ -271,6 +286,7 @@ export function calculateSetterResult(fields) {
       rubro: rubroObj?.label || null,
       por_plataforma: porPlataforma,
       desglose_identidad: desgloseIdentidadComunidad,
+      es_proyeccion_personas: proyeccionDePersonas,
       tam,
       sam,
       som: { min: somMin, max: somMax },
