@@ -122,7 +122,7 @@ export default function SetterWizard({ form, onComplete, loading }) {
         {STEPS[step].key === 'etapa' && (
           <div>
             <p className="wizard-step-hint" style={{ marginTop: 0, marginBottom: 14 }}>
-              Opcional, multi-selección — el setup puede convivir con captación.
+              Opcional, multi-selección — el setup puede convivir con engagement.
             </p>
             <div className="selectable-list">
               {STAGES.map((s) => (

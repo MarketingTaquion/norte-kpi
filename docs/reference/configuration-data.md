@@ -17,8 +17,8 @@ roadmap en [`docs/SPEC.md`](../SPEC.md)).
 
 ## `src/data/stages.js` — `STAGES`
 
-7 etapas de proyecto, cada una con `{ value, label, description, group }`.
-`group` es `"Setup"` (4 etapas) o `"Comunidad"` (3 etapas) — se usa para
+4 etapas de proyecto, cada una con `{ value, label, description, group }`.
+`group` es `"Setup"` (3 etapas) o `"Comunidad"` (1 etapa) — se usa para
 agrupar visualmente, y además **fuerza el SOP a "SOP Setup"** en la
 calculadora si hay alguna etapa "Setup · ..." seleccionada (ver
 `setupForzado` en
