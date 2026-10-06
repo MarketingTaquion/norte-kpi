@@ -782,6 +782,19 @@ input:focus, textarea:focus, select:focus {
   opacity: 0.85;
 }
 
+.kpi-card-funnel-fuente-tier {
+  justify-content: flex-start;
+  margin-top: 4px;
+}
+
+.kpi-card-funnel-tier-som .kpi-card-funnel-fuente-tier {
+  justify-content: center;
+}
+
+.kpi-card-funnel-fuente-alta .kpi-card-funnel-fuente-dot {
+  background: var(--tq-negro);
+}
+
 .kpi-card-funnel-fuente-identidad {
   margin-top: 4px;
 }
