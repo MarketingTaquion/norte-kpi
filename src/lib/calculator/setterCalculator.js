@@ -333,6 +333,7 @@ export function calculateSetterResult(fields) {
       fee: round(taxCheck.fee),
       iva: round(taxCheck.iva),
       percepciones: round(taxCheck.percepciones),
+      dual: round(taxCheck.dual),
       neto: round(taxCheck.neto),
     },
     kpis,

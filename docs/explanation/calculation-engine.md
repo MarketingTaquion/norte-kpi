@@ -55,7 +55,7 @@ aritmética simple:
 ## Chequeo impositivo (Tax Check) — el único cálculo que nunca cambió
 
 ```
-neto = bruto × (1 − 0.10 − 0.21 − 0.04) = bruto × 0.65
+neto = bruto × (1 − 0.10 − 0.21 − 0.04 − 0.04) = bruto × 0.61
 ```
 
 Esta fórmula ([`src/utils/tax.js`](../../src/utils/tax.js)) fue siempre

@@ -2,7 +2,7 @@ import { fmtN } from '../../utils/tax.js';
 
 export default function TaxCheckStrip({ taxCheck, moneda }) {
   if (!taxCheck || !taxCheck.bruto) return null;
-  const descuentos = taxCheck.fee + taxCheck.iva + taxCheck.percepciones;
+  const descuentos = taxCheck.fee + taxCheck.iva + taxCheck.percepciones + (taxCheck.dual || 0);
   return (
     <div className="tax-strip">
       <div className="tax-strip-item">
@@ -11,7 +11,7 @@ export default function TaxCheckStrip({ taxCheck, moneda }) {
       </div>
       <div className="tax-strip-arrow">→</div>
       <div className="tax-strip-item center">
-        <div className="tax-strip-label">Fee + IVA + Perc.</div>
+        <div className="tax-strip-label">Fee + IVA + Perc. + Dual</div>
         <div className="tax-strip-value accent">−{fmtN(descuentos, moneda)}</div>
       </div>
       <div className="tax-strip-arrow">→</div>
