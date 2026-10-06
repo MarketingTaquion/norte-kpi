@@ -1,6 +1,18 @@
 import RangeMeter from '../shared/RangeMeter.jsx';
 import SeverityGauge from '../shared/SeverityGauge.jsx';
 
+// Fuente y nivel de confianza de cada escalón del embudo (TAM/SAM/SOM): el
+// calculador ya los arma en `kpi.confianza`, acá se muestran en la tarjeta.
+function FuenteConfianza({ confianza }) {
+  if (!confianza) return null;
+  return (
+    <div className={`kpi-card-funnel-fuente kpi-card-funnel-fuente-tier kpi-card-funnel-fuente-${confianza.nivel}`}>
+      <span className="kpi-card-funnel-fuente-dot" />
+      <span className="kpi-card-funnel-fuente-detalle">{confianza.nivel === 'alta' ? confianza.label : `${confianza.fuente} · validar antes de comprometer con el cliente`}</span>
+    </div>
+  );
+}
+
 export default function KpiCards({ kpis }) {
   if (!kpis || kpis.length === 0) return null;
   return (
@@ -61,6 +73,7 @@ export default function KpiCards({ kpis }) {
                 <div>
                   <div className="kpi-card-funnel-tier-label">Universo (TAM)</div>
                   <div className="kpi-card-funnel-tier-sub">Techo demográfico puro</div>
+                  <FuenteConfianza confianza={k.confianza?.tam} />
                 </div>
                 <div className="kpi-card-funnel-tier-valor">{k.tam != null ? k.tam.toLocaleString('es-AR') : '—'}</div>
               </div>
@@ -70,6 +83,7 @@ export default function KpiCards({ kpis }) {
                 <div>
                   <div className="kpi-card-funnel-tier-label">Zona + intereses (SAM)</div>
                   <div className="kpi-card-funnel-tier-sub">TAM acotado por territorio e intereses</div>
+                  <FuenteConfianza confianza={k.confianza?.sam} />
                 </div>
                 <div className="kpi-card-funnel-tier-valor">{k.sam != null ? k.sam.toLocaleString('es-AR') : '—'}</div>
               </div>
@@ -79,6 +93,7 @@ export default function KpiCards({ kpis }) {
                 <div className="kpi-card-funnel-tier-label">Estimado (SOM)</div>
                 <div className="kpi-card-funnel-tier-valor-big">{k.som.min.toLocaleString('es-AR')}–{k.som.max.toLocaleString('es-AR')}</div>
                 <div className="kpi-card-funnel-tier-sub">Recortado por el techo poblacional de la zona</div>
+                <FuenteConfianza confianza={k.confianza?.som} />
               </div>
 
               {k.comunidad ? (
