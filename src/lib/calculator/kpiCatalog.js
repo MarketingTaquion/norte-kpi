@@ -62,9 +62,14 @@ export const CATEGORIES = [
     sop: 'SOP Comunidad',
     kpi_tecnico: 'Crecimiento de audiencia',
     formula: 'Crecimiento = (Seguidores fin - Seguidores inicio) / Seguidores inicio * 100',
-    benchmarkKey: 'engagement_ig',
+    // Seguidores nuevos que salen del neto: se usa el CPL B2C como proxy del
+    // costo por seguidor (no hay un benchmark propio todavía). Antes caía en
+    // `referencial` con engagement_ig (1–3 %) y devolvía ese % como si fueran
+    // personas (SOM 1–3, Comunidad 0–0).
+    benchmarkKey: 'cpl_b2c',
+    costoBenchmarkKey: 'cpl_b2c',
     unidad: 'cantidad',
-    modo: 'referencial',
+    modo: 'costo_por_unidad',
   },
   {
     key: 'retencion',

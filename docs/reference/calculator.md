@@ -24,7 +24,7 @@ primera keyword que matchea en el texto de cada `pedido`:
 | `trafico` | tráfico, visitas, clics, ctr | SOP Ignite | CTR y volumen de clics | `costo_por_unidad` (usa CPC) |
 | `alcance` | alcance, reach, impresiones, marca, posicionamiento | SOP Comunidad | Alcance / Impresiones | `alcance` |
 | `engagement` | engagement, interacción, comentarios, likes | SOP Comunidad | Tasa de Engagement | `porcentaje` |
-| `seguidores` | seguidor, followers, audiencia, comunidad, crecimiento | SOP Comunidad | Crecimiento de audiencia | `referencial` |
+| `seguidores` | seguidor, followers, audiencia, comunidad, crecimiento | SOP Comunidad | Crecimiento de audiencia | `costo_por_unidad` (usa CPL B2C como proxy del costo por seguidor) |
 | `retencion` | retención, churn, fidelización, recompra | SOP Comunidad | Tasa de Retención / Churn | `referencial` |
 | `setup` | acceso, tracking, pixel, implementación, naming | SOP Setup | Hito de implementación | `hito` |
 | `conversion` (default) | conversión, o ninguna keyword matcheó | SOP Ignite | Tasa de Conversión | `porcentaje` |
