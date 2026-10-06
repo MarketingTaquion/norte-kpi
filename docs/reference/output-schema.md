@@ -17,7 +17,7 @@ consumidores.
     "metas_ajustadas": 0
   },
   "tax_check": {
-    "bruto": 0, "fee": 0, "iva": 0, "percepciones": 0, "neto": 0
+    "bruto": 0, "fee": 0, "iva": 0, "percepciones": 0, "dual": 0, "neto": 0
   },
   "kpis": [
     {

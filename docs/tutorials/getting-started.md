@@ -33,7 +33,7 @@ para esto — el wizard corre enteramente en el browser.
 3. **Pasos 2 a 5** (Etapa, Período, Presupuesto, Plataformas): son opcionales,
    podés dejarlos vacíos y seguir tocando **Continuar**. Si querés ver el Tax
    Check en acción, cargá un presupuesto en el paso 4 (ej. `1000000`) y vas a
-   ver el desglose de fee/IVA/percepciones actualizarse en vivo.
+   ver el desglose de fee/IVA/percepciones/Dual actualizarse en vivo.
 4. **Paso 6 — Pedidos**: escribí al menos un pedido en lenguaje coloquial, por
    ejemplo:
    > Quiero más leads calificados para el equipo comercial
